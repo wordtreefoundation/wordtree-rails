@@ -1,0 +1,3 @@
+table.data tr:nth-child(even) { background-color: #eef; }
+table.data tr:nth-child(odd) { background-color: #eee; }
+table.data td { padding: 4px 5px; }
