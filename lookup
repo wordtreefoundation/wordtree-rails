@@ -1,0 +1,7 @@
+#!/bin/bash
+
+DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+SPACES=$(echo "$1" | perl -lne '$c++ while / /g; END { print $c; }')
+N=$((SPACES + 1))
+
+$DIR/sgrep/bin/sgrep "$1 " $DIR/${N}grams.freq

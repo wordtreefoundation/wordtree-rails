@@ -1,0 +1,21 @@
+#!/usr/bin/env ruby
+
+columns = []
+values = []
+$stdin.read.split("\n").map do |line|
+  key, value = line.split("=")
+  columns << key
+  values << value
+end
+
+def to_value(v)
+  begin
+    Float(v)
+    v.to_s
+  rescue
+    "'#{v.to_s}'"
+  end
+end
+
+puts "INSERT INTO #{ARGV[0]} (#{columns.join(", ")}) VALUES (#{values.map{|v|to_value(v)}.join(", ")});"
+

@@ -1,0 +1,8 @@
+#!/bin/bash
+
+FILE=${1%.txt.gz}
+
+gunzip -c ${FILE}.txt.gz \
+| LC_ALL=C sort \
+| uniq -c \
+> ${FILE}.freq

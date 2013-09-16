@@ -1,0 +1,17 @@
+#!/bin/bash
+
+PV="pv -l -i 0.2 -c -N "
+
+$PV gzip \
+| fgrep -v '        1 ' \
+| $PV 'n > 1' \
+| awk '{print $2}' \
+| grep -v 'aa\|bbb\|cc\|ddd|\eee|\fff|\ggg\|hh\|ii\|jj\|kk\|lll\|mmm\|nnn\|ooo\|ppp\|qq\|rrr\|sss\|ttt\|uu\|vvv\|ww\|xx\|yy\|zzz' \
+| $PV triples \
+| awk '{ if (length($1) < 30) print $1 }' \
+| $PV output
+
+#| $PV length \
+#| ruby use_bayes.rb \
+#| fgrep Word \
+#| awk '{print $1}' \

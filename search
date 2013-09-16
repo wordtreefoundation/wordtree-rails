@@ -1,0 +1,8 @@
+#!/bin/bash
+
+DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+SPACES=$(echo "$1" | perl -lne '$c++ while /-/g; END { print $c; }')
+N=$((SPACES + 1))
+
+cd $DIR/${N}gr
+ls -1 | parallel --gnu --jobs 6 $DIR/showsource $1 {}

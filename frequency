@@ -1,0 +1,18 @@
+#!/bin/bash
+
+DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+
+FILE=$1
+YEAR=${2:-1992}
+N=${3:-0}
+
+if [[ $N == "0" ]]; then
+  N=$(basename $1 | grep -Po '\.\dgram' | sed 's/gram//' | sed 's/\.//')
+fi
+
+#echo "FILE: $FILE"
+#echo "YEAR: $YEAR"
+#echo "N: $N"
+#join $DIR/bom/bom-${YEAR}.freq.${N}grams $FILE | join - $DIR/${N}grams.freq
+join $DIR/bom/bom-${YEAR}.double.${N}grams $FILE
+

@@ -1,0 +1,10 @@
+#!/bin/bash
+
+DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+
+FILE=$1
+BFILE=$(basename $FILE)
+WCFILE=$DIR/words/counts/${BFILE%.freq.triple.4grams}.wordcount
+
+#WORDCOUNT=$(cat ${WCFILE})
+awk '{ sum += ($3 * $4 / $2) }END{ printf "%16f\t%s\n", sum, g}' f=$WORDCOUNT g=$BFILE $FILE 

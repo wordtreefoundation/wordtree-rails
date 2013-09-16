@@ -1,0 +1,20 @@
+#!/bin/bash
+
+# Example usage:
+# ./showsource foolish-imaginations-of 3gr/29020.firstbooknapole00gruagoog-words.freq.3grams
+
+DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+
+ID=$(basename $2 | awk -F . '{ print $2 }' | sed 's/-words//')
+LINE=$($DIR/sgrep/bin/sgrep "$1	" $2) 
+COUNT=$(echo $LINE | awk '{ print $2 }')
+SEARCH=$(echo $1 | sed 's/-/\\s/g')
+WORDFILE=$DIR/words/$(basename $2 | sed 's/.freq..grams/.txt/')
+
+if [[ $COUNT != "" ]]; then
+  echo "$2 $COUNT $ID"
+  fgrep "$ID" $DIR/archive.catalog.txt
+  #echo "$WORDFILE $SEARCH"
+  pcregrep --color=always -Mn -C 1 "$SEARCH" $WORDFILE
+  echo
+fi

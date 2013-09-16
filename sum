@@ -1,0 +1,22 @@
+#!/usr/bin/env ruby
+
+def lineform(sum, key)
+  puts "#{key} #{sum}"
+end
+
+sum = 0
+same_key = nil
+
+$stdin.each_line do |line|
+  key, count = line.split("\t", 2)
+  if key == same_key
+    sum += count.to_i
+  else
+    lineform(sum, same_key) if same_key
+    sum = count.to_i
+    same_key = key
+  end
+end
+
+lineform(sum, same_key)
+

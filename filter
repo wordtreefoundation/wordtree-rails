@@ -1,0 +1,3 @@
+#!/bin/bash
+
+grep -v 'aa\|bbb\|ccc\|ddd\|eee\|fff\|ggg\|hh\|ii\|jj\|kk\|lll\|mmm\|nnn\|ooo\|ppp\|qq\|rrr\|sss\|ttt\|uuu\|vvv\|ww\|xx\|yy\|zzz'

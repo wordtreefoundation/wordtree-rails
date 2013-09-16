@@ -1,0 +1,3 @@
+#!/bin/bash
+
+awk '/---/{n++}{print > f "." n "grams"}' f="$1" "$1" 

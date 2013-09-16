@@ -1,0 +1,13 @@
+#!/bin/bash
+
+for FILE in $(ls -1 *.triple); do
+  WORDFILE=$(basename ${FILE} | sed 's/\.freq\.triple/.txt/')
+  WCFILE="${FILE}.wordcount"
+  
+  if [ -e $WCFILE ]; then
+    echo "Already done counting ${WORDFILE}"
+  else
+    echo "Counting ${WORDFILE}"
+    cat ~/ngrams/words/${WORDFILE} | wc -l >$WCFILE
+  fi
+done
