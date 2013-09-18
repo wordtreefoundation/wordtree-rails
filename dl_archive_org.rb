@@ -3,11 +3,11 @@ require 'json'
 require 'date'
 
 def make_query_url(page = 1, per_page = 50)
-  %{http://archive.org/advancedsearch.php?q=mediatype%3Atexts+AND+-mediatype%3Acollection+AND+date%3A[1500-01-01%20TO%201830-01-01]+AND+language%3A%28eng%29&fl[]=identifier&fl[]=title&fl[]=creator&fl[]=date&fl[]=language&fl[]=mediatype&sort[]=date+asc&rows=#{per_page}&page=#{page}&output=json}
+  %{http://archive.org/advancedsearch.php?q=mediatype%3Atexts+AND+-mediatype%3Acollection+AND+date%3A[1830-01-02%20TO%201859-12-31]+AND+language%3A%28eng%29&fl[]=identifier&fl[]=title&fl[]=creator&fl[]=date&fl[]=language&fl[]=mediatype&sort[]=date+asc&rows=#{per_page}&page=#{page}&output=json}
 end
 
 page = 1
-ao_list = File.open("ao_list.csv", "w")
+ao_list = File.open("ao_list2.csv", "w")
 
 loop do
   puts "Page: #{page}"

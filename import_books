@@ -1,0 +1,10 @@
+#!/usr/bin/env ruby
+
+DIR = File.dirname(__FILE__)
+import_book = File.join(DIR, 'import_book')
+
+$stdin.each_line do |line|
+  book_id, archive_org_id = line.chomp.split("\t")
+  $stderr.puts "Importing #{book_id} #{archive_org_id}..."
+  `#{import_book} #{book_id} #{archive_org_id}`
+end

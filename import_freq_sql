@@ -1,3 +1,4 @@
+#!/bin/bash
 
 if [[ "$1" == "" ]]; then
   echo USAGE: import_freq BOOK_ID
@@ -11,22 +12,48 @@ SQLFILE=$(tempfile)
 cat <<-'---' | sed "s/#BOOK_ID#/$1/g" >"$SQLFILE"
 BEGIN TRANSACTION;
 
-CREATE TEMP TABLE tmp_ngrams_freq (
-  gram TEXT[],
-  freq INTEGER NOT NULL DEFAULT 1
-) ON COMMIT DROP;
+-- Set 'n' value based on NULLs in columns
+UPDATE ngrams_load AS nl
+SET n = CASE
+          WHEN nl.g1 = '-' THEN 0
+          WHEN nl.g2 = '-' THEN 1
+          WHEN nl.g3 = '-' THEN 2
+          WHEN nl.g4 = '-' THEN 3
+          WHEN nl.g5 = '-' THEN 4
+          ELSE 5
+        END,
+    ngram_id = ng.id
+FROM ngrams AS ng
+WHERE ng.g1 = nl.g1
+  AND ng.g2 = nl.g2
+  AND ng.g3 = nl.g3
+  AND ng.g4 = nl.g4
+  AND ng.g5 = nl.g5;
 
-\COPY tmp_ngrams_freq FROM pstdin DELIMITER ' ';
+-- Cull ngrams that are already in the ngrams table
+DELETE FROM ngrams_load
+WHERE ngram_id IS NULL;
+
+-- Cull ngrams that have no corresponding 1grams
+DELETE FROM ngrams_load
+WHERE #BOOK_ID# != 0
+   AND (NOT EXISTS (SELECT 1 FROM ngrams n WHERE '-' = ngrams_load.g2 OR n.g1 = ngrams_load.g2)
+   OR NOT EXISTS (SELECT 1 FROM ngrams n WHERE '-' = ngrams_load.g3 OR n.g1 = ngrams_load.g3)
+   OR NOT EXISTS (SELECT 1 FROM ngrams n WHERE '-' = ngrams_load.g4 OR n.g1 = ngrams_load.g4)
+   OR NOT EXISTS (SELECT 1 FROM ngrams n WHERE '-' = ngrams_load.g5 OR n.g1 = ngrams_load.g5));
 
 -- Insert all ngrams; duplicates will be ignored by rule
-INSERT INTO ngrams (n, gram)
-SELECT array_length(gram, 1), gram FROM tmp_ngrams_freq;
+INSERT INTO ngrams (n, g1, g2, g3, g4, g5)
+SELECT n, g1, g2, g3, g4, g5 FROM ngrams_load;
 
 -- If the book's frequencies already exist, remove them
 UPDATE frequencies AS f
 SET freq = f.freq - g.freq
 FROM frequencies AS g
-WHERE f.book_id = 0 AND g.book_id = #BOOK_ID# AND f.ngram_id = g.ngram_id;
+WHERE f.book_id = 0
+  AND g.book_id = #BOOK_ID#
+  AND f.book_id != g.book_id
+  AND f.ngram_id = g.ngram_id;
 
 DELETE FROM frequencies
 WHERE book_id = #BOOK_ID#;
@@ -34,14 +61,21 @@ WHERE book_id = #BOOK_ID#;
 -- Insert frequencies for this book
 INSERT INTO frequencies (book_id, ngram_id, freq)
 SELECT #BOOK_ID#, g.id, freq
-FROM tmp_ngrams_freq t
-INNER JOIN ngrams g ON g.n = array_length(t.gram, 1) AND g.gram = t.gram
-WHERE g.id IS NOT NULL;
+FROM ngrams_load t
+INNER JOIN ngrams g
+   ON g.g1 = t.g1
+  AND g.g2 = t.g2
+  AND g.g3 = t.g3
+  AND g.g4 = t.g4
+  AND g.g5 = t.g5;
 
 UPDATE frequencies AS f
 SET freq = f.freq + g.freq
 FROM frequencies AS g
-WHERE f.book_id = 0 AND g.book_id = #BOOK_ID# AND f.ngram_id = g.ngram_id;
+WHERE f.book_id = 0
+  AND g.book_id = #BOOK_ID#
+  AND f.book_id != g.book_id
+  AND f.ngram_id = g.ngram_id;
 
 COMMIT;
 ---

@@ -1,5 +1,5 @@
 CREATE TABLE books (
-  id SERIAL,
+  id SERIAL PRIMARY KEY,
   filename TEXT,
   title TEXT,
   author TEXT,
@@ -24,22 +24,44 @@ ON books (archive_org_id)
 WHERE archive_org_id IS NOT NULL;
 
 
-CREATE TABLE ngrams (
-  id SERIAL,
+CREATE TABLE ngrams_load (
+  ngram_id INTEGER,
   n INTEGER,
-  gram TEXT[]
+  g1 TEXT NOT NULL DEFAULT '-',
+  g2 TEXT NOT NULL DEFAULT '-',
+  g3 TEXT NOT NULL DEFAULT '-',
+  g4 TEXT NOT NULL DEFAULT '-',
+  g5 TEXT NOT NULL DEFAULT '-',
+  freq INTEGER
 );
 
-CREATE UNIQUE INDEX ngrams_ngrams
-ON ngrams (n, gram);
+CREATE INDEX ngrams_load_ngram_id ON ngrams_load (ngram_id);
 
-CREATE RULE "ngrams_on_duplicate_ignore" AS ON INSERT TO "ngrams"
-  WHERE EXISTS(SELECT 1 FROM ngrams WHERE (n, gram)=(NEW.n, NEW.gram))
-  DO INSTEAD NOTHING;
+CREATE INDEX ngrams_load_g1 ON ngrams_load (g1);
+CREATE INDEX ngrams_load_g2 ON ngrams_load (g2);
+CREATE INDEX ngrams_load_g3 ON ngrams_load (g3);
+CREATE INDEX ngrams_load_g4 ON ngrams_load (g4);
+CREATE INDEX ngrams_load_g5 ON ngrams_load (g5);
 
+
+CREATE TABLE ngrams (
+  id SERIAL PRIMARY KEY,
+  n INTEGER,
+  g1 TEXT NOT NULL DEFAULT '-',
+  g2 TEXT NOT NULL DEFAULT '-',
+  g3 TEXT NOT NULL DEFAULT '-',
+  g4 TEXT NOT NULL DEFAULT '-',
+  g5 TEXT NOT NULL DEFAULT '-'
+);
+
+CREATE INDEX ngrams_g1 ON ngrams (g1);
+CREATE INDEX ngrams_g2 ON ngrams (g2);
+CREATE INDEX ngrams_g3 ON ngrams (g3);
+CREATE INDEX ngrams_g4 ON ngrams (g4);
+CREATE INDEX ngrams_g5 ON ngrams (g5);
 
 CREATE TABLE frequencies (
-  id SERIAL,
+  id SERIAL PRIMARY KEY,
   ngram_id INTEGER,
   book_id INTEGER,
   freq INTEGER NOT NULL DEFAULT 1
@@ -53,7 +75,7 @@ ON frequencies (book_id, ngram_id);
 
 
 CREATE TABLE experiments (
-  id SERIAL,
+  id SERIAL PRIMARY KEY,
   name TEXT,
   abbrev TEXT,
   sample_size INTEGER,
@@ -67,7 +89,7 @@ ON experiments (book_id);
 
 
 CREATE TABLE comparisons (
-  id SERIAL,
+  id SERIAL PRIMARY KEY,
   experiment_id INTEGER,
   book_id INTEGER,
   score FLOAT

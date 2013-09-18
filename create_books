@@ -1,0 +1,34 @@
+#!/usr/bin/env ruby
+require_relative "pgconn"
+
+DIR = File.dirname(__FILE__)
+
+$conn.prepare("insert_book", 
+  "INSERT INTO books (archive_org_id, title, year, author) " + 
+  "VALUES ($1, $2, $3, $4) RETURNING id")
+$conn.prepare("find_book", "SELECT id FROM books WHERE archive_org_id=$1")
+
+def create_book(archive_org_id, title, year, author)
+  $conn.exec_prepared("insert_book", [archive_org_id, title, year, author]).
+    first['id']
+end
+
+import_book = File.join(DIR, 'import_book')
+
+$stdin.each_line do |line|
+  begin
+    archive_org_id, title, year, author = line.chomp.split("\t")
+    book_id = create_book(archive_org_id, title, year, author)
+    $stderr.puts "Created #{book_id} #{archive_org_id}"
+  rescue PG::UniqueViolation => e
+    $stderr.puts "Skipping #{archive_org_id}, duplicate"
+    book_id = $conn.exec_prepared("find_book", [archive_org_id]).first['id']
+  end
+
+  begin
+    $stderr.puts "Importing #{archive_org_id}..."
+    `#{import_book} #{book_id} #{archive_org_id}`
+  rescue Error => e
+    $stderr.puts e
+  end
+end

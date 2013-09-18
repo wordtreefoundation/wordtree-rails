@@ -1,0 +1,21 @@
+#!/bin/bash
+
+DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+
+BOOK_ID=$1
+ARCHIVE_ORG_ID=$2
+TXT_FILEPATH="$DIR/library/${ARCHIVE_ORG_ID}.txt"
+
+if [ -f $TXT_FILEPATH ]; then
+  psql -a -e -c 'DELETE FROM ngrams_load' library
+
+  pv $TXT_FILEPATH \
+  | $DIR/remix/cleantext \
+  | $DIR/ngrams --n=5 \
+  | $DIR/freq2tabcols \
+  | psql -a -e -c '\COPY ngrams_load (g1, g2, g3, g4, g5, freq) FROM pstdin' library
+
+  psql -a -e -f $($DIR/import_freq_sql $BOOK_ID) library
+else
+  echo "Book $TXT_FILEPATH does not exist, skipping" >&2
+fi  

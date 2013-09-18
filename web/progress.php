@@ -1,7 +1,7 @@
 <?php
 
-  $files_count = shell_exec("ls -1 /research/ngrams/dl_ao/ | wc -l");
-  $tail_dl = shell_exec("tail /research/ngrams/dl_ao/ao_list.csv | awk -F '\t' '{ printf \"<tr><td>%s</td><td>%s</td><td>%s</td><td>%s</td></tr>\", $1, $3, $2, $4 }'");
+  $files_count = shell_exec("ls -1 /research/ngrams/library/ | wc -l");
+  $tail_dl = shell_exec("tail /research/ngrams/library/ao_list2.csv | awk -F '\t' '{ printf \"<tr><td>%s</td><td>%s</td><td>%s</td><td>%s</td></tr>\", $1, $3, $2, $4 }'");
 
 ?>
 
