@@ -30,22 +30,6 @@ WHERE ng.g1 = nl.g1
   AND ng.g4 = nl.g4
   AND ng.g5 = nl.g5;
 
--- Cull ngrams that are already in the ngrams table
-DELETE FROM ngrams_load
-WHERE ngram_id IS NULL;
-
--- Cull ngrams that have no corresponding 1grams
-DELETE FROM ngrams_load
-WHERE #BOOK_ID# != 0
-   AND (NOT EXISTS (SELECT 1 FROM ngrams n WHERE '-' = ngrams_load.g2 OR n.g1 = ngrams_load.g2)
-   OR NOT EXISTS (SELECT 1 FROM ngrams n WHERE '-' = ngrams_load.g3 OR n.g1 = ngrams_load.g3)
-   OR NOT EXISTS (SELECT 1 FROM ngrams n WHERE '-' = ngrams_load.g4 OR n.g1 = ngrams_load.g4)
-   OR NOT EXISTS (SELECT 1 FROM ngrams n WHERE '-' = ngrams_load.g5 OR n.g1 = ngrams_load.g5));
-
--- Insert all ngrams; duplicates will be ignored by rule
-INSERT INTO ngrams (n, g1, g2, g3, g4, g5)
-SELECT n, g1, g2, g3, g4, g5 FROM ngrams_load;
-
 -- If the book's frequencies already exist, remove them
 UPDATE frequencies AS f
 SET freq = f.freq - g.freq
