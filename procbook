@@ -4,4 +4,4 @@ DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
 export LC_ALL=C
 
-$DIR/bookscores $1 | $DIR/lines2upsert books filename | psql research
+$DIR/bookscores $1 | $DIR/lines2upsert books archive_org_id | psql library

@@ -4,24 +4,27 @@
 
 <h2>Upload a Book</h2>
 
+<h3>TEMPORARILY DISABLED</h3>
+
 <?php
 if ($_POST['submit'] && $_FILES['uploaded']['tmp_name']):
 
   $filename = basename($_FILES['uploaded']['name']);
   $destpath = "/research/ngrams/books/" . $filename;
   if (move_uploaded_file($_FILES['uploaded']['tmp_name'], $destpath)) {
-    echo "<h3>Processing...</h3>";
-    echo nl2br(shell_exec("/research/ngrams/procbook $destpath 2>&1"));
+    echo "Disabled";
+    # echo "<h3>Processing...</h3>";
+    # echo nl2br(shell_exec("/research/ngrams/procbook $destpath 2>&1"));
 
-    $result = pg_exec($link, "SELECT id FROM books WHERE filename='$filename'");
-    $row = pg_fetch_assoc($result);
-    $id = $row['id'];
+    # $result = pg_exec($link, "SELECT id FROM books WHERE filename='$filename'");
+    # $row = pg_fetch_assoc($result);
+    # $id = $row['id'];
 
-    $title = pg_escape_literal($_REQUEST['title']);
-    $year = (int)$_REQUEST['year'];
-    $result = pg_exec($link, "UPDATE books SET title=$title, year=$year WHERE id=$id");
+    # $title = pg_escape_literal($_REQUEST['title']);
+    # $year = (int)$_REQUEST['year'];
+    # $result = pg_exec($link, "UPDATE books SET title=$title, year=$year WHERE id=$id");
 
-    echo "<a href='book.php?id=$id'>View Book Details</a>";
+    # echo "<a href='book.php?id=$id'>View Book Details</a>";
   } else {
     echo "Unable to move file to books path";
   }

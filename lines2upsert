@@ -15,7 +15,7 @@ def to_value(v)
     Float(v)
     v.to_s
   rescue
-    "'#{v.to_s}'"
+    "'#{v.to_s.gsub("'", "''")}'"
   end
 end
 

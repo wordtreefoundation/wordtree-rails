@@ -4,15 +4,16 @@ DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
 FILE="$1"
 BNFILE=$(basename $FILE)
-SFILE=${BNFILE%.txt}
-DESTDIR="$(dirname $FILE)/${SFILE}"
+ARCHIVE_ORG_ID=${BNFILE%.txt}
+DESTDIR="$(dirname $FILE)/${ARCHIVE_ORG_ID}"
 
-CLEANTXT="$DESTDIR/$SFILE.clean.txt"
-FREQFILE="$DESTDIR/$SFILE.freq"
-WCFILE="$DESTDIR/$SFILE.wordcount"
+CLEANTXT="${DESTDIR}/${ARCHIVE_ORG_ID}.clean"
+FREQFILE="${DESTDIR}/${ARCHIVE_ORG_ID}.freq"
+WCFILE="${DESTDIR}/${ARCHIVE_ORG_ID}.wordcount"
 
 if [ -e "$FILE" ]; then
-  echo "filename=$BNFILE"
+  echo "filename=${BNFILE}"
+  echo "archive_org_id=$ARCHIVE_ORG_ID"
 else
   echo "File does not exist: $1" >&2
   exit -1
@@ -52,26 +53,26 @@ fi
 WORDCOUNT=$(cat $WCFILE)
 echo "wordcount=${WORDCOUNT:-0}"
 
-echo "Creating triples..." >&2
-for N in 1 2 3 4 5; do
-  echo "${N}grams..." >&2
-  for SUBSET in int-bom int-bom.no-kjv; do
-    echo "$SUBSET" >&2
-
-    if [[ "$SUBSET" == "int-bom" ]]; then DBSUBSET=""; fi
-    if [[ "$SUBSET" == "int-bom.no-kjv" ]]; then DBSUBSET="nokjv_"; fi
-
-    BOMFILE=$DIR/bom2/bom-1830.freq.${N}grams.${SUBSET}.weight+freq
-    TRIPLEFILE=${FREQFILE}.${N}grams.${SUBSET}.triple
-    if [ -f "$TRIPLEFILE" ]; then
-      echo "Triple file exists; skipping." >&2
-    else
-      join -1 1 -2 1 $BOMFILE ${FREQFILE}.${N}grams >$TRIPLEFILE
-    fi
-
-    SCORE=$($DIR/score $TRIPLEFILE | awk '{ print $1 }')
-    echo "score_bom_${DBSUBSET}${N}g=${SCORE:-0}"
-
+# echo "Creating triples..." >&2
+# for N in 1 2 3 4 5; do
+#   echo "${N}grams..." >&2
+#   for SUBSET in int-bom int-bom.no-kjv; do
+#     echo "$SUBSET" >&2
+# 
+#     if [[ "$SUBSET" == "int-bom" ]]; then DBSUBSET=""; fi
+#     if [[ "$SUBSET" == "int-bom.no-kjv" ]]; then DBSUBSET="nokjv_"; fi
+# 
+#     BOMFILE=$DIR/bom2/bom-1830.freq.${N}grams.${SUBSET}.weight+freq
+#     TRIPLEFILE=${FREQFILE}.${N}grams.${SUBSET}.triple
+#     if [ -f "$TRIPLEFILE" ]; then
+#       echo "Triple file exists; skipping." >&2
+#     else
+#       join -1 1 -2 1 $BOMFILE ${FREQFILE}.${N}grams >$TRIPLEFILE
+#     fi
+# 
+#     SCORE=$($DIR/score $TRIPLEFILE | awk '{ print $1 }')
+#     echo "score_bom_${DBSUBSET}${N}g=${SCORE:-0}"
+# 
 #    for SECTION in 1ne 2ne 3ne 4ne alm eno eth hel jac jar mni mor mos omn pre wom; do
 #      BOMFILE=$DIR/bom2/bom-1830.${SECTION}.freq.${N}grams.${SUBSET}.weight+freq
 #      TRIPLEFILE=${FREQFILE}.${N}grams.${SECTION}.${SUBSET}.triple
@@ -80,6 +81,6 @@ for N in 1 2 3 4 5; do
   
 #      echo "score_${SECTION}_${DBSUBSET}${N}g=${SCORE:-0}"
 #    done
-  done
-done
+#   done
+# done
 
