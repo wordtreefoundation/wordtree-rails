@@ -1,0 +1,16 @@
+#!/usr/bin/env ruby
+
+require 'fileutils'
+
+def each_file(&block)
+  lib = File.join(File.dirname(__FILE__), "library")
+  Dir.glob("**/*.freq.2grams") do |file|
+    yield file
+  end
+end
+
+each_file do |file|
+  puts file
+  result = `sgrep #{ARGV[0]} #{file}`
+  puts "#{file} #{result}" if result
+end

@@ -1,0 +1,11 @@
+#!/bin/bash
+
+DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+
+zcat "$@" | pv -cN cat | LC_ALL=C sort | pv -cN sorted | $DIR/sum
+
+# cmd="LC_ALL=C sort -mu"
+# for file in "$@"; do
+#   cmd="$cmd <(pv -cN $(basename $file) '$file' | gunzip -c)"
+# done
+# bash -c "$cmd" | pv -cN sorted | $DIR/sum

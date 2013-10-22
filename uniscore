@@ -1,0 +1,2 @@
+#python score.py $1 114441 $2 | tail -1 | awk -v b1="$1" -v b2="$2" '{ printf "%s %s %.02f\n", b1, b2, $2 }'
+python score.py $1 nothing $2 | tail -1 | awk -v b1="$1" -v b2="$2" '{ printf "%s %s %.02f\n", b1, b2, $2 }'

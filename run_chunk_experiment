@@ -1,0 +1,183 @@
+#!/usr/bin/env ruby
+
+require_relative "pgconn"
+require_relative "compare_ngrams"
+require 'optparse'
+require 'set'
+
+options = {
+  :overwrite => false,
+  :delete => false
+}
+
+OptionParser.new do |opts|
+  opts.banner = "Usage: run_chunk_experiment [options] EXPERIMENT_ID"
+
+  opts.on("-e", "--experiment-id ID", "Experiment ID") do |id|
+    options[:experiment_id] = id
+  end
+end.parse!
+
+if options[:experiment_id].nil?
+  if ARGV.size == 1
+    options[:experiment_id] = Integer(ARGV.first)
+  else
+    puts "Experiment ID required"; exit -1
+  end
+end
+
+def get_experiment(experiment_id)
+  $conn.exec(<<-SQL, [experiment_id]).first
+  SELECT e.id AS experiment_id, 
+         e.n,
+         e.suffix,
+         e.book_id,
+         e.year_range,
+         b.archive_org_id AS aoid
+  FROM experiments e 
+  LEFT JOIN books b ON e.book_id = b.id
+  WHERE e.id = $1
+  LIMIT 1
+  SQL
+end
+
+def get_books(year_range)
+  $conn.exec(<<-SQL)
+  SELECT id AS book_id, archive_org_id AS aoid, year
+  FROM books
+  WHERE year BETWEEN #{year_range}
+  ORDER BY year DESC, RANDOM()
+  SQL
+end
+
+def get_top_books
+  [
+   {"book_id"=>221041, "aoid"=>"third-epistle-of-peter"}
+  ]
+end
+
+class Baseline
+  attr_reader :frequency
+
+  def initialize(n)
+    @n = n
+  end
+
+  def load
+    @frequency = {}
+    File.open(filename) do |file|
+      file.each_line do |line|
+	key, value = line.split
+	value = value.to_i
+	@frequency[key] ||= 0
+	@frequency[key] += value
+      end
+    end
+    return self
+  end
+
+  def filename
+    File.join(File.dirname(__FILE__), 'baseline', "baseline.freq.#{@n}grams")
+  end
+end
+
+class Book
+  attr_reader :aoid
+
+  def initialize(aoid)
+    @aoid = aoid
+  end
+
+  def clean_text
+    @clean_text ||=
+      File.read(File.join(File.dirname(__FILE__), 'library', aoid[0..1].downcase, aoid, aoid + '.clean'))
+  end
+
+  def words
+    clean_text.split
+  end
+
+  def chunks(words_per_chunk = 4000)
+    return [] unless words
+    whole = words.each_slice(words_per_chunk)
+    half = words[(words_per_chunk/2)..-1].each_slice(words_per_chunk)
+    whole.zip(half).flatten(1).compact.map{ |words| Chunk.new(words, 3) }
+  rescue
+    []
+  end
+end
+
+class Chunk
+  def initialize(words, n)
+    @words = words
+    @n = n
+  end
+
+  def ngrams
+    @words.each_cons(@n).map{ |*parts| parts.join('-') }
+  end
+
+  def grams3
+    @words.each_cons(3).map{ |a, b, c| "#{a}-#{b}-#{c}" }
+  end
+
+  def ngramset
+    @ngramset ||= Set.new(ngrams())
+  end
+
+  def intersect(other_chunk)
+    ngramset & other_chunk.ngramset
+  end
+
+  def score(other_chunk, baseline)
+    total = 0.0
+    thisgrams = ngrams()
+    othergrams = other_chunk.ngramset
+    thisgrams.each do |g|
+      if othergrams.include?(g)
+        total += 1.0 / (baseline.frequency[g] || 1.0)
+      end
+    end
+    return total
+  end
+end
+
+
+$conn.prepare('chunk_insert', <<-SQL)
+INSERT INTO chunks (experiment_id, source_book_id, source_part_id, compare_book_id, compare_part_id, score)
+VALUES ($1, $2, $3, $4, $5, $6)
+SQL
+
+def save_score(expid, s_id, s_part, c_id, c_part, score)
+  $conn.exec_prepared('chunk_insert', [expid, s_id, s_part, c_id, c_part, score])
+end
+
+def csv_score(expid, s_id, s_part, c_id, c_part, score)
+  "#{expid}\t#{s_id}\t#{s_part}\t#{c_id}\t#{c_part}\t#{score}"
+end
+
+def run(experiment_id)
+  exp = get_experiment(experiment_id)
+  $stderr.puts "Loading baseline..."
+  $stderr.flush
+  baseline = Baseline.new(3).load
+  $stderr.puts "Loading #{exp['aoid']}..."
+  source = Book.new(exp['aoid'])
+  #get_books(exp['year_range']).each do |row|
+  get_top_books.each do |row|
+    compare = Book.new(row['aoid'])
+    $stderr.puts row['aoid']
+    $stderr.flush
+    source.chunks.each_with_index do |sc, i|
+      compare.chunks.each_with_index do |cc, j|
+        # score = sc.intersect(cc).size
+        score = sc.score(cc, baseline)
+        puts csv_score(experiment_id, exp['book_id'], i, row['book_id'], j, score)
+        # puts "#{source.aoid}.#{i} #{compare.aoid}.#{j} #{score}"
+        # save_score(experiment_id, exp['book_id'], i, row['book_id'], j, score)
+      end
+    end
+  end
+end
+
+run(options[:experiment_id])
