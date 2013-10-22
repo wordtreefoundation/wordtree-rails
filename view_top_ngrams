@@ -1,0 +1,135 @@
+#!/usr/bin/env ruby
+
+require_relative "pgconn"
+require_relative "compare_ngrams"
+require "optparse"
+
+SkipCompare = Class.new(Exception)
+
+options = {
+  :n => 4,
+  :suffix => "grams"
+}
+OptionParser.new do |opts|
+  opts.banner = "Usage: view_top_ngrams [options]"
+
+  opts.on("-g", "--gram-size N", "Size of N (gram)") do |n|
+    options[:n] = Integer(n)
+  end
+  opts.on("-i", "--book-id ID", "ID of the source book") do |book_id|
+    options[:archive_org_id] ||= []
+    options[:archive_org_id] << get_book_archive_org_id(book_id)
+    options[:book_id] ||= []
+    options[:book_id] << book_id
+  end
+  opts.on("-b", "--book-archive-org-id ID", "Archive.org ID of the source book") do |archive_org_id|
+    options[:archive_org_id] ||= []
+    options[:archive_org_id] << archive_org_id
+    options[:book_id] ||= []
+    options[:book_id] << get_book_id(archive_org_id)
+  end
+  opts.on("-u", "--minus-book-id ID", "ID of the book being subtracted") do |book_id|
+    options[:minus_archive_org_id] = get_book_archive_org_id(book_id)
+    options[:minus_book_id] = book_id
+  end
+  opts.on("-m", "--minus-book-archive-org-id ID", "Archive.org ID of the book being subtracted") do |archive_org_id|
+    options[:minus_archive_org_id] = archive_org_id
+    options[:minus_book_id] = get_book_id(archive_org_id)
+  end
+  opts.on("-a", "--compare-book-id ID", "ID of the book to compare") do |book_id|
+    options[:compare_archive_org_id] ||= []
+    options[:compare_archive_org_id] << get_book_archive_org_id(book_id)
+    options[:compare_book_id] ||= []
+    options[:compare_book_id] << book_id
+  end
+  opts.on("-c", "--compare-archive-org-id ID", "Archive.org ID of the book to compare") do |archive_org_id|
+    options[:compare_archive_org_id] ||= []
+    options[:compare_archive_org_id] << archive_org_id
+    options[:compare_book_id] ||= []
+    options[:compare_book_id] << get_book_id(archive_org_id)
+  end
+  opts.on("-f", "--suffix SUFFIX", "Suffix to use for ngram files, e.g. 'grams+'") do |f|
+    options[:suffix] = f
+  end
+end.parse!
+
+def sorted_ngram_scores(baseline, ngrams, compare_ngrams, use_negatives=true)
+  triples = []
+  score = 0.0
+  match_score = 0.0
+  neg_match_score = 0.0
+  ngrams.each_pair do |k, v|
+    bk = baseline[k] || 4.0
+    if compare_value = compare_ngrams[k]
+      points = v.to_f * compare_value.to_f / (v.to_f + baseline[k].to_f)
+      mpoints = 1.0 / bk
+      score += points
+      match_score += mpoints
+      triples << [k, bk, v, compare_value, points, mpoints]
+    elsif use_negatives
+      neg_match_score += 1.0 / bk
+    end
+  end
+  if use_negatives
+    compare_ngrams.each_pair do |k, v|
+      unless ngrams[k]
+        neg_match_score += 1.0 / (baseline[k] || 4.0)
+      end
+    end
+  end
+  puts "Score: #{score}"
+  puts "MatchScore: #{match_score}"
+  puts "NegMatchScore: #{neg_match_score}"
+  puts "MatchScore / NegMatchScore: #{match_score / neg_match_score}"
+  triples.sort_by{ |x| x[5] }.reverse
+end
+
+$ngrams = {}
+$baseline = nil
+
+def compare(archive_org_id, minus_archive_org_id, compare_archive_org_id, n=4, grams="grams")
+  if minus_archive_org_id
+    puts "Comparing #{archive_org_id} - #{minus_archive_org_id} with #{compare_archive_org_id}"
+  else
+    puts "Comparing #{archive_org_id} with #{compare_archive_org_id}"
+  end
+  row = {
+    "archive_org_id" => archive_org_id,
+    "minus_archive_org_id" => minus_archive_org_id,
+    "compare_archive_org_id" => compare_archive_org_id
+  }
+  begin
+  assure_ngrams($ngrams, row, "archive_org_id", n, grams)
+  assure_ngrams($ngrams, row, "minus_archive_org_id", n, grams)
+  assure_ngrams($ngrams, row, "compare_archive_org_id", n, grams)
+  rescue Errno::ENOENT => e
+    puts "Unable to load file #{e}"
+    raise SkipCompare
+  end
+  adjusted_ngrams = subtract_ngrams($ngrams,
+                      row["archive_org_id"],
+                      row["minus_archive_org_id"])
+  puts "Loading baseline for #{n}#{grams}..."
+  $baseline ||= load_baseline_ngrams(n, grams)
+  
+  puts "Calculating scores..."
+  triples = sorted_ngram_scores($baseline, adjusted_ngrams, $ngrams[row["compare_archive_org_id"]])
+  triples.each do |*args|
+    puts args.join(" ")
+  end
+end
+
+# Allow command-line to specify one book (-b) for all compared books (multiple -c)
+if options[:archive_org_id].size == 1 && options[:compare_archive_org_id].size > 1
+  single_archive_org_id = true
+  options[:archive_org_id] *= options[:compare_archive_org_id].size
+end
+
+options[:archive_org_id].zip(options[:compare_archive_org_id]).each do |aoid, caoid|
+  begin
+    compare(aoid, options[:minus_archive_org_id], caoid, options[:n], options[:suffix])
+  rescue SkipCompare
+  end
+  $ngrams.delete(aoid) unless single_archive_org_id
+  $ngrams.delete(caoid)
+end

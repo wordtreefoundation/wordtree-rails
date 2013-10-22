@@ -1,0 +1,146 @@
+#!/usr/bin/env ruby
+
+require_relative "pgconn"
+require_relative "compare_ngrams"
+require 'optparse'
+
+options = {
+  :overwrite => false,
+  :delete => false
+}
+
+OptionParser.new do |opts|
+  opts.banner = "Usage: run_experiment [options] EXPERIMENT_ID"
+
+  opts.on("-e", "--experiment-id ID", "Experiment ID") do |id|
+    options[:experiment_id] = id
+  end
+  opts.on("-o", "--[no-]overwrite", "Overwrite previously existing DB comparisons") do |o|
+    options[:overwrite] = o
+  end
+  opts.on("-d", "--[no-]delete", "Delete previously existing DB comparisons") do |o|
+    options[:delete] = o
+  end
+end.parse!
+
+if options[:experiment_id].nil?
+  if ARGV.size == 1
+    options[:experiment_id] = Integer(ARGV.first)
+  else
+    puts "Experiment ID required"; exit -1
+  end
+end
+
+def get_archive_org_id_triples(experiment_id, overwrite=false)
+  $conn.exec(<<-SQL, [experiment_id])
+  SELECT e.id AS experiment_id, 
+         e.n,
+         e.suffix,
+         c.id AS comparison_id,
+         b1.archive_org_id,
+         b2.archive_org_id AS minus_archive_org_id, 
+         b3.archive_org_id AS compare_archive_org_id,
+         c.book_id AS compare_book_id
+  FROM experiments e 
+    LEFT JOIN comparisons c ON c.experiment_id = e.id 
+    LEFT JOIN books b1 ON b1.id = e.book_id 
+    LEFT JOIN books b2 ON b2.id = e.minus_book_id 
+    LEFT JOIN books b3 ON b3.id = c.book_id
+  WHERE e.id = $1
+    #{overwrite ? '' : 'AND c.score IS NULL'}
+  ORDER BY c.priority DESC, RANDOM()
+  SQL
+end
+
+def delete_comparisons(experiment_id)
+  $conn.exec(<<-SQL, [experiment_id])
+  UPDATE comparisons SET score=NULL, neg_score=NULL WHERE experiment_id = $1
+  SQL
+end
+
+def calc_score(baseline, ngrams, compare_ngrams)
+  score = 0.0
+  neg_score = 0.0
+  ngrams.each_pair do |k, v|
+    bk = baseline[k] || 4.0
+    if compare_value = compare_ngrams[k]
+      score += 1.0 / bk
+    else # Count a non-match
+      neg_score += 1.0 / bk
+    end
+  end
+
+  # Find remaning non-match ngrams
+  compare_ngrams.each_pair do |k, v|
+    unless ngrams[k]
+      neg_score += 1.0 / (baseline[k] || 4.0)
+    end
+  end
+
+  [score, neg_score]
+end
+
+puts "Starting..."
+
+if options[:delete]
+  puts "Deleting previous data..."
+  delete_comparisons(options[:experiment_id])
+end
+
+ngrams = {}
+baseline = nil
+at_least_one = false
+get_archive_org_id_triples(options[:experiment_id], options[:overwrite]).each do |row|
+  if row["comparison_id"].nil?
+    puts "No comparisons in this experiment"
+    break
+  end
+  at_least_one = true
+  puts "#{row["archive_org_id"]} #{row["minus_archive_org_id"]} #{row["compare_archive_org_id"]} (#{row["n"]}) [#{row["suffix"]}]"
+  begin
+    assure_ngrams(ngrams, row, "archive_org_id", row["n"], row["suffix"])
+    if ngrams[row["archive_org_id"]].nil?
+      puts "Primary book not found: #{row["archive_org_id"]}"
+      exit -1
+    end
+    assure_ngrams(ngrams, row, "minus_archive_org_id", row["n"], row["suffix"])
+    if row["minus_archive_org_id"] and ngrams[row["minus_archive_org_id"]].nil?
+      puts "Minus book not found: #{row["minus_archive_org_id"]}"
+      next
+    end
+    assure_ngrams(ngrams, row, "compare_archive_org_id", row["n"], row["suffix"])
+    if ngrams[row["compare_archive_org_id"]].nil?
+      puts "Comparison book not found: #{row["compare_archive_org_id"]}"
+      next
+    end
+    adjusted_ngrams = subtract_ngrams(ngrams,
+                        row["archive_org_id"],
+                        row["minus_archive_org_id"])
+    if not baseline
+      puts "Loading baseline #{row["n"]} #{row["suffix"]}"
+      baseline = load_baseline_ngrams(row["n"], row["suffix"])
+    end
+    score, neg_score = 
+      calc_score(baseline, adjusted_ngrams, ngrams[row["compare_archive_org_id"]])
+    puts "Score: #{score}, NegScore: #{neg_score}"
+  
+    upsert("comparisons", [:id],
+      :id => row["comparison_id"],  
+      :experiment_id => options[:experiment_id],
+      :book_id => row["compare_book_id"], 
+      :score => score,
+      :neg_score => neg_score)
+  
+    # release memory
+    ngrams.delete row["compare_archive_org_id"]
+  rescue Errno::ENOENT => e
+    puts "Unable to load file: #{e}"
+  rescue StandardError => e
+    puts e
+    puts e.backtrace
+  end
+end
+
+unless at_least_one
+  puts "Nothing done. Did you forget '-o'?"
+end

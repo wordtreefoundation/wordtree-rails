@@ -1,0 +1,13 @@
+#!/bin/bash
+
+if [[ ! -d library/$1 ]]; then
+  echo "Making library/$1..."
+  mkdir library/$1
+fi
+
+if [[ ! -d library/$1/$2 ]]; then
+  echo "Moving $1/$2 to library/$1/$2"
+  mv $1/$2 library/$1/$2
+else
+  echo "Already exists (library/$1/$2)"
+fi

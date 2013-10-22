@@ -1,0 +1,205 @@
+#!/usr/bin/env ruby
+
+require 'optparse'
+require 'fileutils'
+require 'json'
+require_relative 'pgconn'
+
+options = {
+  :reverse => false,
+  :traverse_dir => true
+}
+OptionParser.new do |opts|
+  opts.banner = "Usage: sync_check [options]"
+
+  opts.on("-y", "--year YEAR_RANGE", "Filter between YEAR_RANGE, e.g. '1500 AND 1800'") do |year|
+    options[:year] = year
+    options[:traverse_dir] = false
+  end
+  opts.on("-b", "--book BOOK", "Archive org ID of a particular book to check") do |book|
+    options[:book] = book
+    options[:traverse_dir] = false
+  end
+  opts.on("-r", "--[no-]reverse", "Traverse directories in reverse") do |r|
+    options[:reverse] = r
+  end
+end.parse!
+
+puts "Options:"
+puts JSON.pretty_generate(options)
+
+DIR = File.expand_path(File.dirname(__FILE__))
+LIB = File.join(DIR, 'library')
+
+def double_nested_check(d1, d2)
+  dup_path = File.join(d2, d2)
+  text_file = File.join(d2, d2 + '.txt')
+  if File.exist?(text_file)
+    puts "Detected double nested directory #{d1}/#{text_file}"
+    `mv #{text_file} .`
+    `mv #{dup_path}/* #{d2}`
+    `rmdir #{dup_path}`
+  end
+end
+
+def check_text_exists(d1, d2)
+end
+  
+=begin
+if [ -e "$FILE" ]; then
+  echo "filename=${BNFILE}"
+  echo "archive_org_id=$ARCHIVE_ORG_ID"
+else
+  echo "File does not exist: $1" >&2
+  exit -1
+fi
+
+echo "Creating dest dir $DESTDIR..." >&2
+mkdir -p "$DESTDIR"
+
+if [ -f "$CLEANTXT" ]; then
+  echo "Cleaned text exists; skipping." >&2
+else
+  echo "Cleaning text..." >&2
+  $DIR/remix/cleantext "$1" -o $CLEANTXT
+fi
+
+if [ -f "$WCFILE" ]; then
+  echo "Wordcount file exists; skipping." >&2
+else
+  echo "Counting words..." >&2
+  $DIR/wordcount $CLEANTXT $WCFILE
+fi
+
+if [ -f "$FREQFILE" ]; then
+  echo "Frequency counts file exists; skipping." >&2
+else
+  echo "Creating 1-4+grams..." >&2
+  $DIR/ngram $CLEANTXT $FREQFILE
+fi
+
+if [ -f "$FREQFILE.4grams+" ]; then
+  echo "Ngrams frequency files exist; skipping." >&2
+else
+  echo "Splitting ngrams into files..." >&2
+  $DIR/splitdashes $FREQFILE
+fi
+
+WORDCOUNT=$(cat $WCFILE)
+echo "wordcount=${WORDCOUNT:-0}"
+echo "available=true"
+=end
+
+def unprocessed_check(d1, d2)
+  gram_file = File.join(d2, d2 + '.freq.4grams+')
+  text_file = File.join(d2 + '.txt')
+  if not File.exist?(gram_file)
+    cmd = "#{DIR}/procbook #{text_file}"
+    puts `#{cmd}`
+  end
+end
+
+def trie_check(d1, d2)
+  gram_file = File.join(d2, d2 + '.freq.4grams+')
+  trie_file = File.join(d2, d2 + '.trie.4grams+')
+  if not File.exist?(trie_file)
+    cmd = "(zcat #{gram_file} || cat #{gram_file}) | python #{DIR}/freq2trie.py #{trie_file}"
+    puts cmd
+    puts `#{cmd}`
+  end
+end
+
+def extra_files_check(d1, d2)
+  [
+    File.join(d2, d2 + '.freq.5grams'),
+    File.join(d2, d2 + '.freq')
+  ].each do |file|
+    if File.exist?(file) 
+      puts "Removing extra file #{file}"
+      FileUtils.rm(file)
+    end
+  end
+end
+
+def add_temp_table_id(archive_org_id)
+  $conn.exec("INSERT INTO tmp_ids SELECT $1 WHERE NOT EXISTS (SELECT 1 FROM tmp_ids WHERE archive_org_id=$1)", [archive_org_id])
+end
+
+def set_flag_unavailable
+  puts "Setting flag to 'unavailable' for books not found on disk..."
+  $conn.exec("UPDATE books SET available=false WHERE NOT EXISTS (SELECT 1 FROM tmp_ids t WHERE t.archive_org_id = books.archive_org_id)")
+end
+
+def traverse_by_directory(reverse=false, &block)
+  FileUtils.chdir(LIB) do
+    dirs = Dir.glob("*")
+    dirs.reverse! if reverse
+    dirs.each do |d1|
+      begin
+        FileUtils.chdir(d1) do
+          Dir.glob("*") do |d2|
+            yield(d1, d2)
+          end
+        end
+      rescue Errno::ENOTDIR => e
+        puts "Unable to chdir: #{e}"
+      rescue StandardError => e
+        puts e
+      end
+    end
+  end
+end
+
+def traverse_by_database(year=nil, reverse=false, book=nil, &block)
+  if book
+    result = [{'archive_org_id' => book}]
+    puts "Single book: #{book}"
+  else
+    query = "SELECT year, archive_org_id FROM books #{year ? "WHERE year IS NOT NULL AND year BETWEEN #{year}" : ''} ORDER BY archive_org_id #{reverse ? 'DESC' : ''}"
+    puts "Query: #{query}"
+    result = $conn.exec(query)
+  end
+  FileUtils.chdir(LIB) do
+    result.each do |row|
+      d1 = row['archive_org_id'][0..1].downcase
+      d2 = row['archive_org_id']
+      FileUtils.chdir(d1) do
+        block.call(d1, d2, row)
+      end
+    end
+  end
+end
+
+if options[:traverse_dir]
+  if options[:reverse]
+    puts "Processing directories in reverse order"
+  end
+  
+  $conn.exec("CREATE TEMPORARY TABLE tmp_ids (archive_org_id TEXT PRIMARY KEY)")
+
+  traverse_by_directory(options[:reverse]) do |d1, d2|
+    puts "#{d1}/#{d2}"
+    d2.sub!(/\.txt$/, '')
+    add_temp_table_id(d2)
+    double_nested_check(d1, d2)
+    unprocessed_check(d1, d2)
+    trie_check(d1, d2)
+    extra_files_check(d1, d2)
+  end
+
+  set_flag_unavailable
+else
+  if options[:reverse]
+    puts "Processing archive_org_ids in reverse order"
+  end
+
+  traverse_by_database(options[:year], options[:reverse], options[:book]) do |d1, d2, row|
+    puts "#{d1}/#{d2} (#{row['year']})"
+    unprocessed_check(d1, d2)
+    trie_check(d1, d2)
+    extra_files_check(d1, d2)
+  end
+end
+
+
+puts "Done!"

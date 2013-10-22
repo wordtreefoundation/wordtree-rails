@@ -39,11 +39,11 @@ fi
 if [ -f "$FREQFILE" ]; then
   echo "Frequency counts file exists; skipping." >&2
 else
-  echo "Creating 1-5grams..." >&2
+  echo "Creating 1-4+grams..." >&2
   $DIR/ngram $CLEANTXT $FREQFILE
 fi
 
-if [ -f "$FREQFILE.5grams" ]; then
+if [ -f "$FREQFILE.4grams+" ]; then
   echo "Ngrams frequency files exist; skipping." >&2
 else
   echo "Splitting ngrams into files..." >&2
@@ -52,6 +52,7 @@ fi
 
 WORDCOUNT=$(cat $WCFILE)
 echo "wordcount=${WORDCOUNT:-0}"
+echo "available=true"
 
 # echo "Creating triples..." >&2
 # for N in 1 2 3 4 5; do

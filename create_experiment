@@ -1,0 +1,102 @@
+#!/usr/bin/env ruby
+
+require 'optparse'
+require_relative "pgconn"
+
+options = {
+  :suffix => "grams",
+  :year_range => "1500 AND 1830"
+}
+OptionParser.new do |opts|
+  opts.banner = "Usage: create_experiment [options]"
+
+  opts.on("-y", "--year-range RANGE", "Range of book publish dates, e.g. '1500 AND 1830'") do |range|
+    options[:year_range] = range
+  end
+  opts.on("-g", "--ngram N", "Size of N (gram)") do |n|
+    options[:n] = Integer(n)
+  end
+  opts.on("-n", "--name NAME", "Name of experiment") do |n|
+    options[:name] = n
+  end
+  opts.on("-a", "--abbrev ABBREV", "Abbreviated name of experiment") do |a|
+    options[:abbrev] = a
+  end
+  opts.on("-s", "--sample-size SIZE", "Sample size [defaults to ALL books]") do |s|
+    options[:sample_size] = Integer(s)
+  end
+  opts.on("-i", "--book-id ID", "ID of the source book") do |book_id|
+    options[:book_id] = book_id
+  end
+  opts.on("-b", "--book-archive-org-id ID", "Archive.org ID of the source book") do |archive_org_id|
+    $archive_org_id = archive_org_id
+    options[:book_id] = get_book_id(archive_org_id)
+  end
+  opts.on("-u", "--minus-book-id ID", "ID of the book being subtracted") do |book_id|
+    options[:minus_book_id] = book_id
+  end
+  opts.on("-m", "--minus-book-archive-org-id ID", "Archive.org ID of the book being subtracted") do |archive_org_id|
+    $minus_archive_org_id = archive_org_id
+    options[:minus_book_id] = get_book_id(archive_org_id)
+  end
+  opts.on("-f", "--suffix SUFFIX", "Use SUFFIX for ngrams files, e.g. 'grams+'") do |s|
+    options[:suffix] = s
+  end
+end.parse!
+
+def make_a_name(exp, archive_org_id=nil, minus_archive_org_id=nil)
+  archive_org_id ||= get_book_archive_org_id(exp[:book_id])
+  name = "#{archive_org_id}"
+  if exp[:minus_book_id] or minus_archive_org_id
+    minus_archive_org_id ||= get_book_archive_org_id(exp[:minus_book_id])
+    name += " - #{minus_archive_org_id}"
+  end
+  name += " s:#{exp[:sample_size] || 'ALL'}"
+  name
+end
+
+if options[:book_id]
+  if options[:name].nil?
+    options[:name] = make_a_name(options, 
+      $archive_org_id, $minus_archive_org_id)
+  end
+  # Remove sample size if it's larger than the # of books
+  if options[:sample_size]
+    size = options[:sample_size].to_i
+    book_count = select_one("SELECT COUNT(*) AS c FROM books")["c"]
+    options.delete(:sample_size) if size > book_count.to_i
+  end
+  puts "Creating experiment '#{options[:name]}'..."
+  experiment_id = insert("experiments", options)
+  puts "#{experiment_id}"
+  if options[:sample_size]
+    $conn.exec(<<-SQL, [options[:sample_size], experiment_id])
+     INSERT INTO comparisons (experiment_id, book_id)
+     SELECT $2, id FROM books
+     WHERE year IS NOT NULL
+       AND year BETWEEN #{options[:year_range]}
+       AND id IN
+            (SELECT FLOOR(random() * (max_id - min_id + 1))::INTEGER
+                    + min_id
+               FROM GENERATE_SERIES(1,$1 * 3),
+                    (SELECT max(id) as max_id,
+                            min(id) as min_id
+                       FROM books
+                       WHERE year IS NOT NULL
+                         AND year BETWEEN #{options[:year_range]}) s1
+             LIMIT $1 * 3)
+     ORDER BY random() 
+     LIMIT $1;
+    SQL
+  else
+    $conn.exec(<<-SQL, [experiment_id])
+     INSERT INTO comparisons (experiment_id, book_id)
+     SELECT $1, id FROM books
+     WHERE year IS NOT NULL
+       AND year BETWEEN #{options[:year_range]}
+    SQL
+  end
+else
+  puts "--book-id or --book-archive-org-id is required"
+end
+

@@ -1,3 +1,0 @@
-#!/bin/bash
-
-fgrep -v -e '--' | awk '{ split($1, gram, "-"); printf "%s\t%s\t%s\t%s\t%s\t%s\n", gram[1] == "" ? "-" : gram[1], gram[2] == "" ? "-" : gram[2], gram[3] == "" ? "-" : gram[3], gram[4] == "" ? "-" : gram[4], gram[5] == "" ? "-" : gram[5], $2 }'

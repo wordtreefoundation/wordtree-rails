@@ -1,3 +1,9 @@
-table.data tr:nth-child(even) { background-color: #eef; }
-table.data tr:nth-child(odd) { background-color: #eee; }
-table.data td { padding: 4px 5px; }
+table.data tr:nth-child(even) { background-color: #efefff; }
+table.data tr:nth-child(even) td:nth-child(even) { background-color: #efefef;} 
+
+table.data tr:nth-child(odd) { background-color: #e8e8ef; }
+table.data tr:nth-child(odd) td:nth-child(even) { background-color: #e8e8e8;}   
+
+table.data td, th { padding: 4px 5px; } 
+
+

@@ -1,0 +1,44 @@
+#!/usr/bin/env ruby
+
+require_relative 'sample'
+require 'fileutils'
+require 'optparse'
+require 'open3'
+
+
+options = {
+  :sample_size => 10,
+  :n => 4,
+  :suffix => ".freq.4grams+.gz",
+  :less_than_year => 1830
+}
+OptionParser.new do |opts|
+  opts.banner = "Usage: example.rb [options]"
+
+  opts.on("-y", "--year YEAR", "Books published before YEAR") do |year|
+    options[:less_than_year] = Integer(year)
+  end
+  opts.on("-s", "--sample-size SIZE", "size of the baseline sample") do |size|
+    options[:sample_size] = Integer(size)
+  end
+  opts.on("-n", "--ngram N", "the N grams to create") do |n|
+    options[:n] = Integer(n)
+    options[:suffix] = ".freq.#{n}grams"
+  end
+  opts.on("-f", "--suffix SUFFIX", "the filename suffix to add to archive_org_id (overrides --ngram)") do |suffix|
+    options[:suffix] = suffix
+  end
+end.parse!
+
+files = random_sample(options[:sample_size], options[:less_than_year], options[:suffix])
+threshold = options[:sample_size] / 1000
+threshold_minus_one = threshold > 1 ? threshold - 1 : threshold
+  
+dir = File.expand_path(File.dirname(__FILE__))
+FileUtils.chdir(File.join(dir, 'library')) do
+  Open3.pipeline(
+    ["#{DIR}/merge"] + files,
+    ["awk", "$2>=#{threshold}{print $1 FS $2-#{threshold_minus_one}}"],
+    :out => $stdout)
+end  
+

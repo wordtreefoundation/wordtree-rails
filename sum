@@ -8,7 +8,7 @@ sum = 0
 same_key = nil
 
 $stdin.each_line do |line|
-  key, count = line.split("\t", 2)
+  key, count = line.split(/\s(\d+)$/)
   if key == same_key
     sum += count.to_i
   else

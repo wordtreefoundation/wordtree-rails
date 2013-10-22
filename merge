@@ -1,3 +1,5 @@
 #!/bin/bash
 
-LC_ALL=C sort --merge --batch-size=1000 "$@" | pv -cN sorted | ../sum
+DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+
+LC_ALL=C sort --merge --batch-size=1000 "$@" | pv -cN sorted | $DIR/sum

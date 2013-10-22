@@ -1,3 +1,7 @@
 #!/bin/bash
 
+DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+
 awk '/---/{n++}{print > f "." n "grams"}' f="$1" "$1" 
+(cat $1.4grams ; cat $1.5grams | awk -F '[ -]' '{ print $1 "-" $2 "-_-" $4 "-" $5; print $1 "-_-" $3 "-" $4 "-" $5; print $1 "-" $2 "-" $3 "-_-" $5; }') | LC_ALL=C sort | $DIR/sum | gzip -c >$1.4grams+
+rm $1.5grams
