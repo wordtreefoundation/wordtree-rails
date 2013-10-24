@@ -1,8 +1,0 @@
-#!/usr/bin/env ruby
-
-require_relative 'compare_ngrams'
-require 'json'
-
-freq_file = ARGV[0]
-
-puts load_ngrams(freq_file).to_json

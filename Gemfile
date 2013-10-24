@@ -1,3 +1,4 @@
 source "https://rubygems.org"
 
-gem "pg"
+gem 'pg'
+gem 'qless'
