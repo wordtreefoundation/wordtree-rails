@@ -49,12 +49,12 @@ module Worker
 
     def self.perform(job)
       path = TextfilePath.new(job.data['textfile'])
+      dest = job.data['output'] || path.dest_clean
 
       puts "Cleaning #{path.source}..."
-      Worker::Clean.new(path.source, path.dest_clean).read_write
+      Worker::Clean.new(path.source, dest).read_write
       unless job.data['unchain']
-        job.client.queues['ngram'].put(Worker::Ngram,
-          'cleanfile' => path.dest_clean)
+        job.client.queues['ngram'].put(Worker::Ngram, 'cleanfile' => dest)
       end
       puts "Done cleaning #{path.source}"
     end
