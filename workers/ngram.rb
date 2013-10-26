@@ -19,7 +19,12 @@ module Worker
       puts "Slicing #{cleanfile} into 1..#{n}grams..."
       Worker::Ngram.new(cleanfile, n).slice
       unless job.data['unchain']
-        # job.client.queues['trie'].put(Worker::Trie)
+        dir = File.dirname(cleanfile)
+        (1..n).each do |i|
+          freqfile = cleanfile.sub(/\.(clean|txt)$/, '.freq') + ".#{n}grams"
+          job.client.queues['trieify'].put(Worker::Trieify,
+            :freqfile => freqfile)
+        end
       end
       puts "Done slicing #{cleanfile}"
     end

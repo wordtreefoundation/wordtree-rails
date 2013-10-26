@@ -1,17 +1,24 @@
-require 'marisa'
+require 'trie'
 
 module Worker
-  class Trie
+  class Trieify
     def initialize(input_path, output_path)
       @input_path, @output_path = input_path, output_path
+      @trie = Trie.new
     end
 
-    def read_write
-      File.open(@input_path) do |input|
-        File.open(@output_path, 'w') do |output|
-          clean_text(input, output)
+    def populate_from_freqfile
+      File.open(@input_path) do |file|
+        file.each_line do |line|
+          word, weight = line.split
+          @trie.add(word, weight.to_i)
         end
       end
+    end
+
+    def trieify
+      populate_from_freqfile
+      @trie.save(@output_path)
     end
 
     def self.perform(job)
@@ -19,7 +26,7 @@ module Worker
       dest = job.data['output'] || path.sub('.freq.', '.trie.')
 
       puts "Trieifying #{path}..."
-      Worker::Trie.new(path, dest).read_write
+      Worker::Trieify.new(path, dest).trieify
       unless job.data['unchain']
         # job.client.queues['ngram'].put(Worker::Ngram, 'cleanfile' => dest)
       end
