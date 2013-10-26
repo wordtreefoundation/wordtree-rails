@@ -7,18 +7,19 @@ module Worker
     end
 
     def slice
-      prefix = @cleanfile.sub(/\.clean$/, '')
+      prefix = @cleanfile.sub(/\.(clean|txt)$/, '.freq')
       split_dashes = %[awk '/---/{n++}{print > f "." n "grams"}' f="#{prefix}"]
-      `#{@ngrams_exec} --n=#{@n} --in=#{@cleanfile} | #{split_dashes}`
+      cmd = "#{@ngrams_exec} --n=#{@n} --in=#{@cleanfile} | #{split_dashes}"
+      puts `#{cmd}`
     end
 
     def self.perform(job)
       cleanfile = job.data['cleanfile']
-      n = job.data['n'] || 4
+      n = job.data['n'] || 5
       puts "Slicing #{cleanfile} into 1..#{n}grams..."
-      Worker::Ngram.new(cleanfile, n)
+      Worker::Ngram.new(cleanfile, n).slice
       unless job.data['unchain']
-        # job.client.queues['treify'].put(Worker::Treify)
+        # job.client.queues['trie'].put(Worker::Trie)
       end
       puts "Done slicing #{cleanfile}"
     end
