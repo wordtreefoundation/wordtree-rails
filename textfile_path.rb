@@ -1,9 +1,9 @@
 class TextfilePath
-  LIBRARY = File.join(File.dirname(__FILE__), '..', 'library')
+  DEFAULT_LIBRARY_ROOT = File.join(File.dirname(__FILE__), '..', 'library')
 
-  def initialize(path, library = LIBRARY)
+  def initialize(path, library_root=nil)
     @path = path
-    @library = library
+    @library_root = library_root || DEFAULT_LIBRARY_ROOT
   end
 
   def source
@@ -23,7 +23,7 @@ class TextfilePath
   end
 
   def dest_dirname
-    File.join(@library, *dest_letters)
+    File.join(@library_root, *dest_letters)
   end
 
   def dest_filepath

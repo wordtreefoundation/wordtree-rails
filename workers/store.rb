@@ -6,7 +6,7 @@ module Worker
 
   class Store
     def self.perform(job)
-      path = TextfilePath.new(job.data['textfile'])
+      path = TextfilePath.new(job.data['textfile'], job.data['library_root'])
       puts "Moving #{path.source} to library..."
 
       FileUtils.mkdir_p(path.dest_dirname)
