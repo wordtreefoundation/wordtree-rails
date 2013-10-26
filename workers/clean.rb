@@ -1,8 +1,22 @@
-require_relative '../path'
+require_relative '../textfile_path'
 
 module Worker
+  class Ngram; end
+
   class Clean
-    def self.clean_text(input, output, remove_bible_verse_headings = true)
+    def initialize(input_path, output_path)
+      @input_path, @output_path = input_path, output_path
+    end
+
+    def read_write
+      File.open(@input_path) do |input|
+        File.open(@output_path, 'w') do |output|
+          clean_text(input, output)
+        end
+      end
+    end
+
+    def clean_text(input, output, remove_bible_verse_headings = true)
       join = nil
       words = []
       input.each_line do |line|
@@ -34,14 +48,15 @@ module Worker
     end
 
     def self.perform(job)
-      path = job.data['path']
-      puts "Cleaning #{path}..."
-      File.open(path) do |input|
-        File.open(path.sub(/\.txt$/, '.clean'), 'w') do |output|
-          clean_text(input, output)
-        end
+      path = TextfilePath.new(job.data['textfile'])
+
+      puts "Cleaning #{path.source}..."
+      Worker::Clean.new(path.source, path.dest_clean).read_write
+      unless job.data['unchain']
+        job.client.queues['ngram'].put(Worker::Ngram,
+          'cleanfile' => path.dest_clean)
       end
-      puts "Done cleaning #{path}"
+      puts "Done cleaning #{path.source}"
     end
   end
 end

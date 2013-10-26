@@ -1,4 +1,4 @@
-class Path
+class TextfilePath
   LIBRARY = File.join(File.dirname(__FILE__), '..', 'library')
 
   def initialize(path, library = LIBRARY)
@@ -28,5 +28,9 @@ class Path
 
   def dest_filepath
     File.join(dest_dirname, basename)
+  end
+
+  def dest_clean
+    dest_filepath.sub(/\.txt$/, '.clean')
   end
 end
