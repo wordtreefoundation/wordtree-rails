@@ -6,6 +6,8 @@
 #   cities = City.create([{ name: 'Chicago' }, { name: 'Copenhagen' }])
 #   Mayor.create(name: 'Emanuel', city: cities.first)
 
+Settings.application_name = 'CompareTexts'
+
 public_group = Group.create(name: "Public")
 
 Settings.public_group_id = public_group.id
