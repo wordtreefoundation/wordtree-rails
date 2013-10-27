@@ -15,7 +15,10 @@
 /log/*.log
 /tmp
 
-library/
-Gemfile.lock
-ngrams-cpp/ngrams
-ngrams-cpp/ngrams.dSYM/
+/library/
+/Gemfile.lock
+/ngrams-cpp/ngrams
+/ngrams-cpp/ngrams.dSYM/
+
+.DS_Store
+/spec/tmp/

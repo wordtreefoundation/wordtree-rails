@@ -5,3 +5,7 @@
 #
 #   cities = City.create([{ name: 'Chicago' }, { name: 'Copenhagen' }])
 #   Mayor.create(name: 'Emanuel', city: cities.first)
+
+public_group = Group.create(name: "Public")
+
+Shelf.create(name: "Public", group: public_group)
