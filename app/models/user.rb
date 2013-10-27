@@ -1,6 +1,12 @@
 class User < ActiveRecord::Base
-  has_many :groups, :through => :membership
+  has_many :memberships
+  has_many :groups, :through => :memberships
   
+  # User becomes an admin
+  def promote!
+    groups << Group.find(Settings.admin_group_id)
+  end
+
   def self.create_with_omniauth(auth)
     create! do |user|
       user.provider = auth["provider"]

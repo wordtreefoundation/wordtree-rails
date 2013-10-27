@@ -9,8 +9,10 @@
 Settings.application_name = 'CompareTexts'
 
 public_group = Group.create(name: "Public")
+admin_group = Group.create(name: "Admin")
 
 Settings.public_group_id = public_group.id
+Settings.admin_group_id = admin_group.id
 
 public_shelf = Shelf.create(name: "Public", group: public_group)
 
