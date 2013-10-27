@@ -1,0 +1,13 @@
+# Read about fixtures at http://api.rubyonrails.org/classes/ActiveRecord/Fixtures.html
+
+one:
+  query_id: 1
+  book_id: 1
+  score: 
+  priority: 
+
+two:
+  query_id: 1
+  book_id: 1
+  score: 
+  priority: 

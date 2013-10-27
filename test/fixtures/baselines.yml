@@ -1,0 +1,11 @@
+# Read about fixtures at http://api.rubyonrails.org/classes/ActiveRecord/Fixtures.html
+
+one:
+  name: MyString
+  year_min: 1
+  year_max: 1
+
+two:
+  name: MyString
+  year_min: 1
+  year_max: 1

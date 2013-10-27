@@ -1,0 +1,71 @@
+# Users must identify themselves
+users
+  name
+  uid
+  provider
+  encrypted_password
+  email
+
+# Users can be a member of one or more groups. There is a 'public' group
+# that everyone, by default, is a member of.
+groups
+  name
+  timestamps
+
+# Ties users to groups
+memberships
+  group_id
+  user_id
+  timestamps
+
+# A list of baseline ngram frequencies that can be used in comparisons
+baselines
+  name
+  year_min
+  year_max
+
+# Groups of books
+shelves
+  name
+  user_id
+  group_id
+
+# Book metadata. If 'processed' is true, then the book should exist in
+# our 'library' directory on disk, with ngram 'tries'
+books
+  uuid
+  title
+  author
+  year
+  shelf_id
+  processed
+  archive_org_id
+  google_id
+  wordcount
+  md5
+  timestamps
+
+# A record of all queries
+queries
+  name
+  user_id
+  group_id
+  sample_size
+  book_id
+  minus_shelf_id
+  year_min
+  year_max
+  ngrams
+  score_method
+  baseline_id
+  published
+
+# Individual comparisons of the book from the query with each other book set up
+# when the query was created. The score is initially NULL, indicating the
+# comparison has been scheduled but has not yet been done.
+comparisons
+  query_id
+  book_id
+  score
+  priority
+

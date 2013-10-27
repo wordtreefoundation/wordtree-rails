@@ -1,0 +1,29 @@
+# Read about fixtures at http://api.rubyonrails.org/classes/ActiveRecord/Fixtures.html
+
+one:
+  name: MyString
+  user_id: 1
+  group_id: 1
+  sample_size: 1
+  book_id: 1
+  minus_shelf_id: 1
+  year_min: 1
+  year_max: 1
+  ngrams: 1
+  score_method: MyString
+  baseline_id: 1
+  published: false
+
+two:
+  name: MyString
+  user_id: 1
+  group_id: 1
+  sample_size: 1
+  book_id: 1
+  minus_shelf_id: 1
+  year_min: 1
+  year_max: 1
+  ngrams: 1
+  score_method: MyString
+  baseline_id: 1
+  published: false
