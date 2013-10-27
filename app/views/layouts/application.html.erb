@@ -89,6 +89,9 @@
           <a class="brand" href="<%= root_path %>"><%= Settings.application_name %></a>
           <div class="nav-collapse">
             <ul class="nav nav-bar">
+            <% if current_user.admin? %>
+              <li><%= link_to "Admin", admin_path %></li>
+            <% end %>
             <% (defined?(tabs) ? tabs : []).each do |tab| %>
               <li><a href='<%= u tab[:path] %>'><%= tab[:name] %></a></li>
             <% end %>

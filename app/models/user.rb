@@ -7,6 +7,13 @@ class User < ActiveRecord::Base
     groups << Group.find(Settings.admin_group_id)
   end
 
+  def admin?
+    groups.find(Settings.admin_group_id)
+    true
+  rescue ActiveRecord::RecordNotFound
+    false
+  end
+
   def self.create_with_omniauth(auth)
     create! do |user|
       user.provider = auth["provider"]
