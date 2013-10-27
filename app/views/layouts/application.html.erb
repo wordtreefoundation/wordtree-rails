@@ -96,9 +96,15 @@
             <ul class="nav nav-bar pull-right">
               <li>
                 <form class="navbar-search" action="<%= u '/tag' %>">
-                  <input id="tag-search" type="text" class="search-query" placeholder="Search by Tag" data-provide="typeahead" name="tag"/>
+                  <input id="tag-search" type="text" class="search-query" placeholder="Search Books" data-provide="typeahead" name="tag"/>
                 </form>
               </li>
+              <% if current_user %>
+              <li><%= link_to current_user.name, "#" %></li>
+              <li><%= link_to "Sign Out", signout_path %></li>
+              <% else %>
+              <li><%= link_to "Sign in with Twitter", "/auth/twitter" %></li>
+              <% end %>
             </ul>
           </div>
         </div>
