@@ -10,7 +10,7 @@ namespace :qless do
     ENV['REDIS_URL'] ||= 'redis://localhost:6379/0'
     ENV['QUEUES'] ||= 'store,clean,ngram,trieify'
     ENV['JOB_RESERVER'] ||= 'Ordered'
-    ENV['INTERVAL'] ||= '5' # seconds
+    ENV['INTERVAL'] ||= '2' # seconds
     ENV['VERBOSE'] ||= 'true'
   end
 end

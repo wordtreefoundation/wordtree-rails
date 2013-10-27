@@ -1,4 +1,5 @@
 require 'trie'
+require 'fileutils'
 
 module Worker
   class Trieify
@@ -16,9 +17,14 @@ module Worker
       end
     end
 
+    def remove_freqfile
+      FileUtils.rm @input_path
+    end
+
     def trieify
       populate_from_freqfile
       @trie.save(@output_path)
+      remove_freqfile
     end
 
     def self.perform(job)

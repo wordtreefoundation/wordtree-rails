@@ -1,0 +1,4 @@
+library/
+Gemfile.lock
+ngrams-cpp/ngrams
+ngrams-cpp/ngrams.dSYM/
