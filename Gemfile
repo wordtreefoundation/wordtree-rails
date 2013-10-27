@@ -5,6 +5,9 @@ gem 'fast_trie', '0.5.0'
 gem 'omniauth'
 gem 'omniauth-twitter', :git => "https://github.com/arunagw/omniauth-twitter.git"
 
+# Cached settings from https://github.com/huacnlee/rails-settings-cached
+gem "rails-settings-cached", "0.3.1"
+
 # Bundle edge Rails instead: gem 'rails', github: 'rails/rails'
 gem 'rails', '4.0.0'
 

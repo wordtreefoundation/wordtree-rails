@@ -8,4 +8,8 @@
 
 public_group = Group.create(name: "Public")
 
-Shelf.create(name: "Public", group: public_group)
+Settings.public_group_id = public_group.id
+
+public_shelf = Shelf.create(name: "Public", group: public_group)
+
+Settings.public_shelf_id = public_shelf.id
