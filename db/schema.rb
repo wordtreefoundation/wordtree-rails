@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20131027170540) do
+ActiveRecord::Schema.define(version: 20131027181840) do
 
   create_table "baselines", force: true do |t|
     t.string   "name"
@@ -26,7 +26,6 @@ ActiveRecord::Schema.define(version: 20131027170540) do
     t.string   "title"
     t.string   "author"
     t.integer  "year"
-    t.integer  "shelf_id"
     t.boolean  "processed"
     t.string   "archive_org_id"
     t.string   "google_id"
@@ -41,6 +40,13 @@ ActiveRecord::Schema.define(version: 20131027170540) do
     t.integer  "book_id"
     t.float    "score"
     t.float    "priority"
+    t.datetime "created_at"
+    t.datetime "updated_at"
+  end
+
+  create_table "copies", force: true do |t|
+    t.integer  "shelf_id"
+    t.integer  "book_id"
     t.datetime "created_at"
     t.datetime "updated_at"
   end
