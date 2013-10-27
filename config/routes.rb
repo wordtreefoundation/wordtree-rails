@@ -1,5 +1,13 @@
+require 'qless/server'
+
 CompareTexts::Application.routes.draw do
+  # Route all /jobs/* paths to the Qless job queue server
+  get "/jobs", to: Qless::Server.new(Qless::Client.new), anchor: false
+
+  # Welcome page
   get "/", to: "welcome#index", as: "root"
+
+  # OmniAuth
   get "/auth/signin", to: "sessions#index", as: "signin"
   get "/auth/signout", to: "sessions#destroy", as: "signout"
   get "/auth/:provider/callback", to: "sessions#create"
