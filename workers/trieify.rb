@@ -31,12 +31,12 @@ module Worker
       path = job.data['freqfile']
       dest = job.data['output'] || path.sub('.freq.', '.trie.')
 
-      puts "Trieifying #{path}..."
+      puts "Trieifying #{path}..." if ENV['VERBOSE']
       Worker::Trieify.new(path, dest).trieify
       unless job.data['unchain']
         # job.client.queues['ngram'].put(Worker::Ngram, 'cleanfile' => dest)
       end
-      puts "Done trieifying #{path}"
+      puts "Done trieifying #{path}" if ENV['VERBOSE']
     end
   end
 end

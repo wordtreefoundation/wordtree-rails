@@ -26,7 +26,7 @@ module Worker
     def self.perform(job)
       cleanfile = job.data['cleanfile']
       n = job.data['n'] || 5
-      puts "Slicing #{cleanfile} into 1..#{n}grams..."
+      puts "Slicing #{cleanfile} into 1..#{n}grams..." if ENV['VERBOSE']
       freqfiles = Worker::Ngram.new(cleanfile, n).slice
       unless job.data['unchain']
         dir = File.dirname(cleanfile)
@@ -35,7 +35,7 @@ module Worker
             :freqfile => freqfile)
         end
       end
-      puts "Done slicing #{cleanfile}"
+      puts "Done slicing #{cleanfile}" if ENV['VERBOSE']
     end
   end
 end

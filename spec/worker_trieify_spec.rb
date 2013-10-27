@@ -8,10 +8,13 @@ describe Worker::Trieify do
 
   context "simple 2grams" do
     let(:data) { {
-      "freqfile" => fixture("simple.freq.2grams"),
-      "output" => tmp("simple.trie.2grams"),
+      "freqfile" => tmp("simple.freq.2grams"),
       "unchain" => true
     } }
+
+    before do
+      FileUtils.cp(fixture("simple.freq.2grams"), tmp("simple.freq.2grams"))
+    end
 
     after do
       FileUtils.rm(tmp("simple.trie.2grams.da"))

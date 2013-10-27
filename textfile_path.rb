@@ -18,8 +18,12 @@ class TextfilePath
     File.dirname(@path)
   end
 
+  def fileid
+    basename.sub(/\.txt$/, '')
+  end
+
   def dest_letters
-    [basename[0], basename[1], basename[2]]
+    [fileid[0], fileid[1], fileid[-2], fileid[-1]]
   end
 
   def dest_dirname

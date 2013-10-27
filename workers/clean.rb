@@ -51,12 +51,12 @@ module Worker
       path = TextfilePath.new(job.data['textfile'])
       dest = job.data['output'] || path.dest_clean
 
-      puts "Cleaning #{path.source}..."
+      puts "Cleaning #{path.source}..." if ENV['VERBOSE']
       Worker::Clean.new(path.source, dest).read_write
       unless job.data['unchain']
         job.client.queues['ngram'].put(Worker::Ngram, 'cleanfile' => dest)
       end
-      puts "Done cleaning #{path.source}"
+      puts "Done cleaning #{path.source}" if ENV['VERBOSE']
     end
   end
 end
