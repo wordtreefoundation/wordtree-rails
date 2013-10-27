@@ -1,4 +1,9 @@
 CompareTexts::Application.routes.draw do
+  get "/", to: "welcome#index", as: "root"
+  get "/auth/signin", to: "sessions#index", as: "signin"
+  get "/auth/signout", to: "sessions#destroy", as: "signout"
+  get "/auth/:provider/callback", to: "sessions#create"
+
   # The priority is based upon order of creation: first created -> highest priority.
   # See how all your routes lay out with "rake routes".
 
