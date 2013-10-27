@@ -1,4 +1,6 @@
 module Worker
+  class Trieify; end
+
   class Ngram
     def initialize(cleanfile, n)
       @cleanfile = cleanfile
@@ -6,22 +8,29 @@ module Worker
       @ngrams_exec = File.join(File.dirname(__FILE__), '..', 'ngrams-cpp', 'ngrams')
     end
 
+    def freqfiles
+      (1..@n).map do |n|
+        freqfile = @cleanfile.sub(/\.(clean|txt)$/, '.freq') + ".#{n}grams"
+      end
+    end
+
     def slice
       prefix = @cleanfile.sub(/\.(clean|txt)$/, '.freq')
       split_dashes = %[awk '/---/{n++}{print > f "." n "grams"}' f="#{prefix}"]
       cmd = "#{@ngrams_exec} --n=#{@n} --in=#{@cleanfile} | #{split_dashes}"
-      puts `#{cmd}`
+      result = `#{cmd}`
+      puts result unless result.empty?
+      freqfiles
     end
 
     def self.perform(job)
       cleanfile = job.data['cleanfile']
       n = job.data['n'] || 5
       puts "Slicing #{cleanfile} into 1..#{n}grams..."
-      Worker::Ngram.new(cleanfile, n).slice
+      freqfiles = Worker::Ngram.new(cleanfile, n).slice
       unless job.data['unchain']
         dir = File.dirname(cleanfile)
-        (1..n).each do |i|
-          freqfile = cleanfile.sub(/\.(clean|txt)$/, '.freq') + ".#{n}grams"
+        freqfiles.each do |freqfile|
           job.client.queues['trieify'].put(Worker::Trieify,
             :freqfile => freqfile)
         end

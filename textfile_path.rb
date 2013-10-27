@@ -1,5 +1,5 @@
 class TextfilePath
-  DEFAULT_LIBRARY_ROOT = File.join(File.dirname(__FILE__), '..', 'library')
+  DEFAULT_LIBRARY_ROOT = File.join(File.dirname(__FILE__), 'library')
 
   def initialize(path, library_root=nil)
     @path = path
