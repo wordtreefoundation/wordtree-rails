@@ -1,0 +1,31 @@
+#!/usr/bin/env ruby
+require 'optparse'
+require_relative 'remix'
+
+options = {:n => 1, :output => $stdout}
+OptionParser.new do |opts|
+  opts.banner = "Usage: mkngrams [options] [FILES]"
+
+  opts.on("-n", "--ngram N", "Specify number of ngrams") do |n|
+    options[:n] = Integer(n)
+  end
+  opts.on("-o", "--output FILENAME", "Send output to filename") do |filename|
+    options[:output] = File.open(filename, "w")
+  end
+  opts.on("-b", "--[no-]blanks", "Generate blanks in ngrams") do |blanks|
+    options[:blanks] = blanks
+  end
+end.parse!
+
+if ARGV.size > 0
+# Use files as input
+  ARGV.each do |filename|
+    File.open(filename, :encoding => "UTF-8") do |file|
+      Remix.mkngrams(file, options[:output], options[:n], options[:blanks])
+    end
+  end
+else
+# Use stdin as input
+  $stdin.set_encoding "UTF-8"
+  Remix.mkngrams($stdin, options[:output], options[:n], options[:blanks])
+end

@@ -1,0 +1,20 @@
+#!/usr/bin/env ruby
+
+ngrams = {}
+$stdin.each_line do |line|
+  w = line.chomp.split(' ')
+  if w.size == 5
+    w1 = [w[0], '_', w[2], w[3], w[4]].join(' ')
+    w2 = [w[0], w[1], '_', w[3], w[4]].join(' ')
+    w3 = [w[0], w[1], w[2], '_', w[4]].join(' ')
+    ngrams[w1] ||= 0
+    ngrams[w1] += 1
+    ngrams[w2] ||= 0
+    ngrams[w2] += 1
+    ngrams[w3] ||= 0
+    ngrams[w3] += 1
+  end
+end
+ngrams.sort.each do |gram, n|
+  puts "#{gram} #{n}"
+end

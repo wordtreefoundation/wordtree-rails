@@ -1,0 +1,4 @@
+#!/bin/bash
+
+awk -v n=$1 -F '[_ ]' '{word = 0; for(i = 0; i < NF; i++) { if ($i!="") word++; } if (word == n) print; }'
+

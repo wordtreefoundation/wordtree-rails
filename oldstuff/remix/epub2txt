@@ -1,0 +1,20 @@
+#!/usr/bin/env ruby
+require 'nokogiri'
+require_relative 'epub/lib/epub'
+
+ARGV.each do |filepath|
+  epub = Epub::Document.new(filepath)
+
+  epub.manifest.html.each do |html_section|
+
+    doc = Nokogiri::HTML(html_section.to_s)
+    doc.xpath('//style').each { |el| el.remove }
+
+    text = doc.text.strip
+    if text.include?("scanned by Google") or text.include?("About this Book - From Google")
+      # don't print anything
+    else
+      puts text
+    end
+  end
+end
