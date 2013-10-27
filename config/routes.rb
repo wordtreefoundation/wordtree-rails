@@ -1,7 +1,7 @@
 require 'qless/server'
 
 CompareTexts::Application.routes.draw do
-  # Route all /jobs/* paths to the Qless job queue server
+  # Admin pages for Qless job queue server at /jobs/*
   get "/jobs", to: Qless::Server.new(Qless::Client.new), anchor: false
 
   # Welcome page
