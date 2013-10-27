@@ -2,10 +2,10 @@ module Worker
   class Trieify; end
 
   class Ngram
+    NGRAMS_CPP = File.join(File.dirname(__FILE__), '..', '..', 'ngrams-cpp', 'ngrams')
     def initialize(cleanfile, n)
       @cleanfile = cleanfile
       @n = n
-      @ngrams_exec = File.join(File.dirname(__FILE__), '..', 'ngrams-cpp', 'ngrams')
     end
 
     def freqfiles
@@ -17,7 +17,7 @@ module Worker
     def slice
       prefix = @cleanfile.sub(/\.(clean|txt)$/, '.freq')
       split_dashes = %[awk '/---/{n++}{print > f "." n "grams"}' f="#{prefix}"]
-      cmd = "#{@ngrams_exec} --n=#{@n} --in=#{@cleanfile} | #{split_dashes}"
+      cmd = "#{NGRAMS_CPP} --n=#{@n} --in=#{@cleanfile} | #{split_dashes}"
       result = `#{cmd}`
       puts result unless result.empty?
       freqfiles
