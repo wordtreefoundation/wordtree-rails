@@ -3,7 +3,8 @@ source "https://rubygems.org"
 gem 'qless', '0.9.3'
 gem 'fast_trie', '0.5.0'
 gem 'omniauth'
-gem 'omniauth-twitter', :git => "https://github.com/arunagw/omniauth-twitter.git"
+gem 'omniauth-twitter', :github => "arunagw/omniauth-twitter"
+gem 'activeadmin', github: "gregbell/active_admin"
 
 # Cached settings from https://github.com/huacnlee/rails-settings-cached
 gem "rails-settings-cached", "0.3.1"

@@ -1,4 +1,5 @@
 class Book < ActiveRecord::Base
-  has_many :shelves, :through => :copy
+  has_many :copies
+  has_many :shelves, :through => :copies
   
 end

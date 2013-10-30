@@ -90,7 +90,7 @@
           <div class="nav-collapse">
             <ul class="nav nav-bar">
             <% if current_user.admin? %>
-              <li><%= link_to "Admin", admin_path %></li>
+              <li><%= link_to "Admin", '/admin' %></li>
             <% end %>
             <% (defined?(tabs) ? tabs : []).each do |tab| %>
               <li><a href='<%= u tab[:path] %>'><%= tab[:name] %></a></li>
@@ -115,7 +115,10 @@
     </div>
 
       <div class="container">
-      <%= yield %>
+        <p class="notice"><%= notice %></p>
+        <p class="alert"><%= alert %></p>
+
+        <%= yield %>
       </div> <!-- /container -->
 
     <!-- Le javascript

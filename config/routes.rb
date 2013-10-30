@@ -1,11 +1,14 @@
 require 'qless/server'
 
 CompareTexts::Application.routes.draw do
+  devise_for :users, ActiveAdmin::Devise.config
+  ActiveAdmin.routes(self)
+
   # Admin pages for Qless job queue server at /jobs/*
   get "/jobs", to: Qless::Server.new(Qless::Client.new), anchor: false
 
   # Welcome page
-  get "/", to: "welcome#index", as: "root"
+  root :to => "welcome#index"
 
   # OmniAuth
   get "/auth/signin", to: "sessions#index", as: "signin"
