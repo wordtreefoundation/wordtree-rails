@@ -8,12 +8,17 @@
 
 Settings.application_name = 'CompareTexts'
 
-public_group = Group.create(name: "Public")
-admin_group = Group.create(name: "Admin")
+if Group.where(:name => "Public").empty?
+  public_group = Group.create(name: "Public")
+  Settings.public_group_id = public_group.id
+end
 
-Settings.public_group_id = public_group.id
-Settings.admin_group_id = admin_group.id
+if Group.where(:name => "Admin").empty?
+  admin_group = Group.create(name: "Admin")
+  Settings.admin_group_id = admin_group.id
+end
 
-public_shelf = Shelf.create(name: "Public", group: public_group)
-
-Settings.public_shelf_id = public_shelf.id
+if Shelf.where(:name => "Public").empty?
+  public_shelf = Shelf.create(name: "Public2", group_id: Settings.public_group_id)
+  Settings.public_shelf_id = public_shelf.id
+end
