@@ -1,0 +1,19 @@
+<p id="notice"><%= notice %></p>
+
+<p>
+  <strong>Name:</strong>
+  <%= @shelf.name %>
+</p>
+
+<p>
+  <strong>Group:</strong>
+  <%= @shelf.group.name %>
+</p>
+
+<p>
+  <strong>Created:</strong>
+  <%= @shelf.created_at %>
+</p>
+
+<%= link_to 'Edit', edit_shelf_path(@shelf) %> |
+<%= link_to 'Back', shelves_path %>

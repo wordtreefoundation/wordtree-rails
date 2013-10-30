@@ -1,12 +1,6 @@
 require 'qless/server'
 
 CompareTexts::Application.routes.draw do
-  devise_for :users, ActiveAdmin::Devise.config
-  ActiveAdmin.routes(self)
-
-  # Admin pages for Qless job queue server at /jobs/*
-  get "/jobs", to: Qless::Server.new(Qless::Client.new), anchor: false
-
   # Welcome page
   root :to => "welcome#index"
 
@@ -14,6 +8,17 @@ CompareTexts::Application.routes.draw do
   get "/auth/signin", to: "sessions#index", as: "signin"
   get "/auth/signout", to: "sessions#destroy", as: "signout"
   get "/auth/:provider/callback", to: "sessions#create"
+
+  # ActiveAdmin
+  devise_for :users, ActiveAdmin::Devise.config
+  ActiveAdmin.routes(self)
+
+  # Admin pages for Qless job queue server at /jobs/*
+  get "/jobs", to: Qless::Server.new(Qless::Client.new), anchor: false
+
+  # Resources
+  resources :books
+  resources :shelves
 
   # The priority is based upon order of creation: first created -> highest priority.
   # See how all your routes lay out with "rake routes".
