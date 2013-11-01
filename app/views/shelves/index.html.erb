@@ -1,6 +1,6 @@
 <h1>Shelves</h1>
 
-<table>
+<table class="index-table">
   <thead>
     <tr>
       <th>Name</th>
@@ -18,9 +18,9 @@
         <td><%= shelf.name %></td>
         <td><%= shelf.group.name %></td>
         <td><%= l shelf.created_at, :format => :short %></td>
-        <td><%= link_to 'Show', shelf %></td>
-        <td><%= link_to 'Edit', edit_shelf_path(shelf) %></td>
-        <td><%= link_to 'Destroy', shelf, method: :delete, data: { confirm: 'Are you sure?' } %></td>
+        <td class="tool"><%= link_to 'Show', shelf %></td>
+        <td class="tool"><%= link_to 'Edit', edit_shelf_path(shelf) %></td>
+        <td class="tool"><%= link_to 'Destroy', shelf, method: :delete, data: { confirm: 'Are you sure?' } %></td>
       </tr>
     <% end %>
   </tbody>

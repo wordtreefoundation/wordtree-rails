@@ -67,3 +67,9 @@ div {
     list-style: square;
   }
 }
+
+table.index-table { width: 100%; margin-bottom: 10px; border: 0px none; border-spacing: 0px; }
+table.index-table { border-collapse: separate; vertical-align: middle; }
+table.index-table thead tr { background-color: rgb(120, 26, 120); color: white; line-height: 2em; }
+table.index-table tr:nth-child(2n) { background-color: rgb(241, 241, 241); }
+table.index-table td.tool { width: 75px; }

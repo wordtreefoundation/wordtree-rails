@@ -89,11 +89,10 @@
           <a class="brand" href="<%= root_path %>"><%= Settings.application_name %></a>
           <div class="nav-collapse">
             <ul class="nav nav-bar">
+              <li><%= link_to "Books", '/books' %></li>
+              <li><%= link_to "Shelves", '/shelves' %></li>
             <% if current_user.admin? %>
               <li><%= link_to "Admin", '/admin' %></li>
-            <% end %>
-            <% (defined?(tabs) ? tabs : []).each do |tab| %>
-              <li><a href='<%= u tab[:path] %>'><%= tab[:name] %></a></li>
             <% end %>
             </ul>
             <ul class="nav nav-bar pull-right">
@@ -115,8 +114,8 @@
     </div>
 
       <div class="container">
-        <p class="notice"><%= notice %></p>
-        <p class="alert"><%= alert %></p>
+        <% if notice %><p class="alert alert-info"><%= notice %></p><% end %>
+        <% if alert %><p class="alert alert-error"><%= alert %></p><% end %>
 
         <%= yield %>
       </div> <!-- /container -->

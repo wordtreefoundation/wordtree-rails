@@ -20,6 +20,9 @@ CompareTexts::Application.routes.draw do
   resources :books
   resources :shelves
 
+  get "/shelves/:id/archive_org", to: "archive_org#setup", as: "archive_org_setup"
+  post "/shelves/:id/archive_org", to: "archive_org#initiate", as: "archive_org_initiate"
+  
   # The priority is based upon order of creation: first created -> highest priority.
   # See how all your routes lay out with "rake routes".
 

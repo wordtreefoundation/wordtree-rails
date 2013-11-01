@@ -1,5 +1,10 @@
 <p id="notice"><%= notice %></p>
 
+<p>There are <b><%= @book_count %></b> books in the database.</p>
+
+<%= link_to "Upload a Book", new_book_path %>
+<%= link_to "Transfer From Archive.org", archive_org_setup_path(:id => params[:id]) %>
+
 <p>
   <strong>Name:</strong>
   <%= @shelf.name %>
