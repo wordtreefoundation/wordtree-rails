@@ -11,3 +11,27 @@
  *= require_self
  *= require_directory .
  */
+
+.button, .button:visited {
+  background-color: darkgray;
+  /*float: left;*/
+  -webkit-border-radius: 5px;
+  -moz-border-radius: 5px;
+  border-radius: 5px;
+  color: white;
+  font-weight: bold;
+  padding-top: 2px;
+  padding-left: 7px;
+  padding-right: 7px;
+  padding-bottom: 3px;
+  margin-right: 5px;
+  border: 1px solid #777;
+}
+.button:hover {
+  text-decoration: none;
+  background-color: black;
+}
+
+.button-bar {
+  margin: 1em 0;
+}

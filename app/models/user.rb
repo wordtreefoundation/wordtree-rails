@@ -5,6 +5,7 @@ class User < ActiveRecord::Base
          :recoverable, :rememberable, :trackable, :validatable
   has_many :memberships
   has_many :groups, :through => :memberships
+  has_many :archive_org_transfers
   
   # User becomes an admin
   def promote!
@@ -16,6 +17,10 @@ class User < ActiveRecord::Base
     true
   rescue ActiveRecord::RecordNotFound
     false
+  end
+
+  def logged_in?
+    not new_record?
   end
 
   def self.create_with_omniauth(auth)

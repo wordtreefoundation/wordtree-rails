@@ -1,5 +1,7 @@
 source "https://rubygems.org"
 
+gem 'archivist', github: "wordtreefoundation/archivist"
+
 gem 'qless', '0.9.3'
 gem 'fast_trie', '0.5.0'
 gem 'omniauth'

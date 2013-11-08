@@ -8,6 +8,9 @@
 
 Settings.application_name = 'CompareTexts'
 
+Settings.queue_host = '127.0.0.1'
+Settings.queue_port = 6379
+
 if Group.where(:name => "Public").empty?
   public_group = Group.create(name: "Public")
   Settings.public_group_id = public_group.id
