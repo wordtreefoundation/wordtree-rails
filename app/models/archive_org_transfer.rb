@@ -7,9 +7,10 @@ class ArchiveOrgTransfer < ActiveRecord::Base
   belongs_to :shelf
 
   def initiate
+    save!
     qless_opts = { :host => Settings.queue_host, :port => Settings.queue_port }
     client = Qless::Client.new(qless_opts)
-    client.queues['transfer'].put(ArchiveOrgQuery,
+    client.queues['transfer'].put(Worker::ArchiveOrgQuery,
       :start_year => start_year,
       :end_year => end_year,
       :page => 1

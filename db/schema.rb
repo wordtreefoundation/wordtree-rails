@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20131104013949) do
+ActiveRecord::Schema.define(version: 20131108035625) do
 
   create_table "active_admin_comments", force: true do |t|
     t.string   "namespace"
@@ -31,8 +31,8 @@ ActiveRecord::Schema.define(version: 20131104013949) do
   create_table "archive_org_transfers", force: true do |t|
     t.integer  "user_id"
     t.integer  "shelf_id"
-    t.integer  "min_year"
-    t.integer  "max_year"
+    t.integer  "start_year"
+    t.integer  "end_year"
     t.integer  "per_page",     default: 50
     t.integer  "current_page", default: 0
     t.integer  "total_pages"

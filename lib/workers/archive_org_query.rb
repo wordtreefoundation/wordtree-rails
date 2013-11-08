@@ -34,6 +34,7 @@ module Worker
 
         # Download all books from this page
         books.each do |book|
+          puts "Downloading book #{book.identifier}" if ENV['VERBOSE']
           file = Tempfile.new('book')
           file.write book.download
           job.client.queues['store'].put(Worker::Store,
