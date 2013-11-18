@@ -4,9 +4,11 @@ gem 'archivist', github: "wordtreefoundation/archivist"
 
 gem 'qless', '0.9.3'
 gem 'fast_trie', '0.5.0'
+gem 'activeadmin', github: "gregbell/active_admin"
+
 gem 'omniauth'
 gem 'omniauth-twitter', :github => "arunagw/omniauth-twitter"
-gem 'activeadmin', github: "gregbell/active_admin"
+gem 'omniauth-github', :github => "intridea/omniauth-github"
 
 # Cached settings from https://github.com/huacnlee/rails-settings-cached
 gem "rails-settings-cached", "0.3.1"

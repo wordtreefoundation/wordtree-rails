@@ -5,16 +5,22 @@ CompareTexts::Application.routes.draw do
   root :to => "welcome#index"
 
   # OmniAuth
-  get "/auth/signin", to: "sessions#index", as: "signin"
-  get "/auth/signout", to: "sessions#destroy", as: "signout"
-  get "/auth/:provider/callback", to: "sessions#create"
+  # get "/auth/signin", to: "sessions#index", as: "signin"
+  # get "/auth/signout", to: "sessions#destroy", as: "signout"
+  # get "/auth/:provider/callback", to: "sessions#create"
 
   # ActiveAdmin
-  devise_for :users, ActiveAdmin::Devise.config
+  # p ActiveAdmin::Devise.config
+  # devise_for :users #, ActiveAdmin::Devise.config
+  devise_for :users, :controllers => {
+    :sessions => "sessions",
+    :omniauth_callbacks => "omniauth_callbacks"
+  }
+
   ActiveAdmin.routes(self)
 
   # Admin pages for Qless job queue server at /jobs/*
-  get "/jobs", to: Qless::Server.new(Qless::Client.new), anchor: false
+  # get "/jobs", to: Qless::Server.new(Qless::Client.new), anchor: false
 
   # Resources
   resources :books

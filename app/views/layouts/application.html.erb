@@ -103,9 +103,9 @@
               </li>
               <% if current_user.logged_in? %>
               <li><%= link_to current_user.name, "#" %></li>
-              <li><%= link_to "Sign Out", signout_path %></li>
+              <li><%= link_to "Log Out", destroy_user_session_path %></li>
               <% else %>
-              <li><%= link_to "Sign in with Twitter", "/auth/twitter" %></li>
+              <li><%= link_to "Log In", new_user_session_path %></li>
               <% end %>
             </ul>
           </div>

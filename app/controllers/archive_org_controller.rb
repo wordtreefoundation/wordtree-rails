@@ -1,4 +1,6 @@
 class ArchiveOrgController < ApplicationController
+  before_filter :authenticate_user!
+  
   def setup
     @shelf = Shelf.where(:id => params[:id])
     @transfer = ArchiveOrgTransfer.new(transfer_params)
