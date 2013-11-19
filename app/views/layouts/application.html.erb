@@ -91,7 +91,7 @@
             <ul class="nav nav-bar">
               <li><%= link_to "Books", '/books' %></li>
               <li><%= link_to "Shelves", '/shelves' %></li>
-            <% if current_user.admin? %>
+            <% if current_user && current_user.admin? %>
               <li><%= link_to "Admin", '/admin' %></li>
             <% end %>
             </ul>
@@ -101,8 +101,8 @@
                   <input id="tag-search" type="text" class="search-query" placeholder="Search Books" data-provide="typeahead" name="tag"/>
                 </form>
               </li>
-              <% if current_user.logged_in? %>
-              <li><%= link_to current_user.name, "#" %></li>
+              <% if user_signed_in? %>
+              <li><%= link_to current_user.display_name, "#" %></li>
               <li><%= link_to "Log Out", destroy_user_session_path %></li>
               <% else %>
               <li><%= link_to "Log In", new_user_session_path %></li>

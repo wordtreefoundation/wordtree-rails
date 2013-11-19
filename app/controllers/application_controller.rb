@@ -7,12 +7,12 @@ class ApplicationController < ActionController::Base
 
 private
 
-  def current_user
-    @current_user ||= User.find(session[:user_id])
-  rescue ActiveRecord::RecordNotFound
+  # def current_user
+    # @current_user ||= User.find(session[:user_id])
+  # rescue ActiveRecord::RecordNotFound
     # Anonymous, ephemeral user
-    User.new
-  end
+    # User.new
+  # end
 
   def current_admin_user
     current_user if current_user.admin?
