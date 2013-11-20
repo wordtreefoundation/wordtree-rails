@@ -4,14 +4,7 @@ CompareTexts::Application.routes.draw do
   # Welcome page
   root :to => "welcome#index"
 
-  # OmniAuth
-  # get "/auth/signin", to: "sessions#index", as: "signin"
-  # get "/auth/signout", to: "sessions#destroy", as: "signout"
-  # get "/auth/:provider/callback", to: "sessions#create"
-
   # ActiveAdmin
-  # p ActiveAdmin::Devise.config
-  # devise_for :users #, ActiveAdmin::Devise.config
   devise_for :users, :controllers => {
     :sessions => "sessions",
     :omniauth_callbacks => "omniauth_callbacks"
@@ -20,7 +13,7 @@ CompareTexts::Application.routes.draw do
   ActiveAdmin.routes(self)
 
   # Admin pages for Qless job queue server at /jobs/*
-  # get "/jobs", to: Qless::Server.new(Qless::Client.new), anchor: false
+  get "/jobs", to: Qless::Server.new(Qless::Client.new), anchor: false, as: "qless_jobs"
 
   # Resources
   resources :books
@@ -29,12 +22,6 @@ CompareTexts::Application.routes.draw do
   get "/shelves/:id/archive_org", to: "archive_org#setup", as: "archive_org_setup"
   post "/shelves/:id/archive_org", to: "archive_org#initiate", as: "archive_org_initiate"
   
-  # The priority is based upon order of creation: first created -> highest priority.
-  # See how all your routes lay out with "rake routes".
-
-  # You can have the root of your site routed with "root"
-  # root 'welcome#index'
-
   # Example of regular route:
   #   get 'products/:id' => 'catalog#view'
 

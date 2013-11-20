@@ -1,6 +1,6 @@
 class OnlyAdmins < ActiveAdmin::AuthorizationAdapter
   def authorized?(action, subject = nil)
-    user.admin?
+    user && user.admin?
   end
 end
 
@@ -55,8 +55,8 @@ ActiveAdmin.setup do |config|
   #
   # This setting changes the method which Active Admin calls
   # within the controller.
-  # config.authentication_method = :authenticate_user!
-  config.authentication_method = false
+  config.authentication_method = :authenticate_user!
+  # config.authentication_method = false
 
   # == User Authorization
   #

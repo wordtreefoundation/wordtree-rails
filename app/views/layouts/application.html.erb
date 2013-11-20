@@ -89,10 +89,11 @@
           <a class="brand" href="<%= root_path %>"><%= Settings.application_name %></a>
           <div class="nav-collapse">
             <ul class="nav nav-bar">
-              <li><%= link_to "Books", '/books' %></li>
-              <li><%= link_to "Shelves", '/shelves' %></li>
+              <li><%= link_to "Books", books_path %></li>
+              <li><%= link_to "Shelves", shelves_path %></li>
             <% if current_user && current_user.admin? %>
-              <li><%= link_to "Admin", '/admin' %></li>
+              <li><%= link_to "Admin", admin_root_path %></li>
+              <li><%= link_to "Jobs", qless_jobs_path %></li>
             <% end %>
             </ul>
             <ul class="nav nav-bar pull-right">
