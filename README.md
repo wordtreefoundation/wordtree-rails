@@ -17,3 +17,7 @@ Workers are defined in lib/workers:
 - ngram: Converts a cleaned text file into ngrams using a cpp library
 - trieify: Converts ngram frequency files into a more compact Trie data structure
 
+
+
+[![Bitdeli Badge](https://d2weczhvl823v0.cloudfront.net/wordtreefoundation/wordtree/trend.png)](https://bitdeli.com/free "Bitdeli Badge")
+
