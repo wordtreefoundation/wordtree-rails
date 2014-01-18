@@ -1,6 +1,6 @@
 source "https://rubygems.org"
 
-gem 'archivist', github: "wordtreefoundation/archivist"
+gem 'archivist-client', github: "wordtreefoundation/archivist"
 
 gem 'qless', '0.9.3'
 gem 'fast_trie', '0.5.0'
@@ -14,10 +14,7 @@ gem 'omniauth-github', :github => "intridea/omniauth-github"
 gem "rails-settings-cached", "0.3.1"
 
 # Bundle edge Rails instead: gem 'rails', github: 'rails/rails'
-gem 'rails', '4.0.0'
-
-# Use sqlite3 as the database for Active Record
-gem 'sqlite3'
+gem 'rails', '4.0.1'
 
 # Use SCSS for stylesheets
 gem 'sass-rails', '~> 4.0.0'
@@ -56,4 +53,10 @@ group :development, :test do
   gem 'rspec-rails'
   gem 'debugger'
   gem 'rails-footnotes', :github => 'rrooding/rails-footnotes'
+  gem 'sqlite3'
+end
+
+group :production do
+  # Use postgresql
+  gem 'pg'
 end
