@@ -2,7 +2,7 @@ require 'qless/server'
 require 'uri'
 
 redis_uri = URI(ENV['REDIS_URL'] || 'redis://localhost:6379')
-p ENV
+$stderr.puts ENV.inspect
 
 CompareTexts::Application.routes.draw do
   # Welcome page
