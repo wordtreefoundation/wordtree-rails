@@ -1,4 +1,7 @@
 require 'qless/server'
+require 'uri'
+
+redis_uri = URI(ENV['REDIS_URL'] || 'redis://localhost:6379')
 
 CompareTexts::Application.routes.draw do
   # Welcome page
@@ -13,7 +16,7 @@ CompareTexts::Application.routes.draw do
   ActiveAdmin.routes(self)
 
   # Admin pages for Qless job queue server at /jobs/*
-  get "/jobs", to: Qless::Server.new(Qless::Client.new), anchor: false, as: "qless_jobs"
+  get "/jobs", to: Qless::Server.new(Qless::Client.new(:host => redis_uri.host, :port => redis_uri.port)), anchor: false, as: "qless_jobs"
 
   # Resources
   resources :books
