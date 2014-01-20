@@ -19,6 +19,7 @@ CompareTexts::Application.routes.draw do
   begin
     get "/jobs", to: Qless::Server.new(Qless::Client.new(:host => redis_uri.host, :port => redis_uri.port)), anchor: false, as: "qless_jobs"
   rescue => e
+    
     $stderr.puts "Unable to connect to Redis server (#{ENV.inspect}) [#{e.class}]"
   end
 
