@@ -58,5 +58,5 @@ end
 
 group :production do
   # Use mysql
-  gem 'mysql'
+  gem 'mysql2'
 end
