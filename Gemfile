@@ -2,7 +2,6 @@ source "https://rubygems.org"
 
 gem 'archivist-client', github: "wordtreefoundation/archivist"
 
-gem 'rails_12factor'
 gem 'qless', '0.9.3'
 gem 'fast_trie', '0.5.0'
 gem 'activeadmin', github: "gregbell/active_admin"
@@ -58,6 +57,6 @@ group :development, :test do
 end
 
 group :production do
-  # Use postgresql
-  gem 'pg'
+  # Use mysql
+  gem 'mysql'
 end
